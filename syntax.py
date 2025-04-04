@@ -54,19 +54,19 @@ def assign():
   print("<Assign> ::= <Identifier> -> <Expression>")
 
 def _if():
-  pass
+  print("<If> -> if(<Condition>)<Statement> <If Prime>")
 
 def ifPrime():
   print("<If Prime> -> endif | else <Statement> endif")
 
 def _return():
-  pass 
+  print("<Return> -> return <Return Prime>")
   
 def returnPrime():
-  pass
+  print("<Return Prime> -> ; | <Expression> ;")
 
 def _print():
-  pass
+  print("<Print> ::= print ( <Expression>);")
 
 def scan():
   print("<Scan> -> scan(<IDs>);")
@@ -76,15 +76,20 @@ def _while():
 
 def condition():
   print("<Condition> -> <Expression> <Relop> <Expression>")
+  expression()
+  relop()
+  expression()
 
 def relop():
   print("<Relop> -> == | != | > | < | <= | =>")
 
 def expression():
   print("<Expression> -> <Term> <Expression Prime>")
+  term()
+  expressionPrime()
 
 def expressionPrime():
-  pass
+  print("Expression Prime -> +<Term><Expression Prime> | -<Term><Expression Prime> | empty")
 
 def term():
   print("<Term> -> <Factor><Term Prime>")
@@ -93,7 +98,9 @@ factor()
 termPrime()
 
 def termPrime():
-  print("<Term Prime> -> * <Factor> <Term Prime> | / <Factor> <Term Prime> | epsilon")
+  print("<Term Prime> -> * <Factor> <Term Prime> | / <Factor> <Term Prime> | empty")
+  
+  empty()
   
 
 def factor():
