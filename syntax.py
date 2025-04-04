@@ -1,3 +1,9 @@
+def Rat25S():
+  pass 
+
+def optFunctionDefinitions():
+  pass
+
 def parameter():
   pass 
 
