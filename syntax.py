@@ -15,40 +15,40 @@ def optParameterList():
   pass 
 
 def parameterList(): 
-  pass 
+  print("<Parameter List> -> <Parameter> | <Parameter> , <Parameter List>")
   
 def parameter():
-  pass 
+  print("<Parameter> -> <IDs> <Qualifier>")
 
 def qualifier():
-  pass 
+  print("<Qualifier> -> integer | boolean | real")
   
 def body():
-  pass
+  print("<Body> -> { <Statement List> }")
 
 def optDeclarationList():
-  pass
+  print("<Opt Declaration List> -> <Declaration List> | <Empty>")
   
 def declarationList():
-  pass
+  print("<Declaration List> -> <Declaration> ; | <Declaration> ; <Declaration List>")
 
 def declaration():
-  pass
+  print("<Declaration> -> <Qualifier><IDs>")
 
 def ids():
-  pass 
+  print("<IDs> -> <Identifier> | <Identifier>, <IDs>")
 
 def statementList():
-  pass 
+  print("<Statement List> -> <Statement> | <Statement> <Statement List>")
   
 def statement():
-  pass
+  print("<Statement> -> <Compound> | <Assign> | <If> | <Return> | <Print> | <Scan> | <While>")
 
 def compound():
-  pass
+  print("<Compound> -> { <Statement List> }")
 
 def assign():
-  pass
+  print("<Assign> ::= <Identifier> -> <Expression>")
 
 def _if():
   pass
@@ -66,19 +66,19 @@ def _print():
   pass
 
 def scan():
-  pass
+  print("<Scan> -> scan(<IDs>);")
 
 def _while():
   pass 
 
 def condition():
-  pass
+  print("<Condition> -> <Expression> <Relop> <Expression>")
 
 def relop():
-  pass
+  print("<Relop> -> == | != | > | < | <= | =>")
 
 def expression():
-  pass
+  print("<Expression> -> <Term> <Expression Prime>")
 
 def expressionPrime():
   pass
