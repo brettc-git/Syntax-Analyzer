@@ -69,7 +69,7 @@ def scan():
   print("<Scan> -> scan(<IDs>);")
 
 def _while():
-  pass 
+  print("<While> -> while ( <Condition> ) <Statement> endwhile")
 
 def condition():
   print("<Condition> -> <Expression> <Relop> <Expression>")
@@ -84,13 +84,17 @@ def expressionPrime():
   pass
 
 def term():
-  pass
+  print("<Term> -> <Factor><Term Prime>")
+
+factor()
+termPrime()
 
 def termPrime():
-  pass
+  print("<Term Prime> -> * <Factor> <Term Prime> | / <Factor> <Term Prime> | epsilon")
+  
 
 def factor():
-  pass 
+  print("<Factor> ::= - <Primary> | <Primary>")
 
 def primary():
   pass
