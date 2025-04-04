@@ -14,8 +14,8 @@ def function():
 def optParameterList():
   print("<Opt Parameter List> -> <Parameter List> | <Empty>")
 
-parameterList()
-empty()
+  parameterList()
+  empty()
 
 def parameterList(): 
   print("<Parameter List> -> <Parameter> | <Parameter> , <Parameter List>")
@@ -97,8 +97,8 @@ def expressionPrime():
 def term():
   print("<Term> -> <Factor><Term Prime>")
 
-factor()
-termPrime()
+  factor()
+  termPrime()
 
 def termPrime():
   print("<Term Prime> -> * <Factor> <Term Prime> | / <Factor> <Term Prime> | empty")
