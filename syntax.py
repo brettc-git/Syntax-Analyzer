@@ -9,10 +9,13 @@ def functionDefinitions():
   pass
   
 def function():
-  pass
+  print("<Function> -> function <Identifier> ( <Opt Parameter List> ) <Opt Declaration List> <Body>")
 
 def optParameterList():
-  pass 
+  print("<Opt Parameter List> -> <Parameter List> | <Empty>")
+
+parameterList()
+empty()
 
 def parameterList(): 
   print("<Parameter List> -> <Parameter> | <Parameter> , <Parameter List>")
