@@ -1,13 +1,27 @@
 def parameter():
   pass 
+
+def qualifier():
+  pass 
   
 def body():
   pass
 
+def optDeclarationList():
+  pass
+  
 def declarationList():
   pass
 
+def declaration():
+  pass
 
+def ids():
+  pass 
+
+def statementList():
+  pass 
+  
 def statement():
   pass
 
