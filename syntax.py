@@ -55,6 +55,27 @@ def _if():
 
 def ifPrime():
   pass
+
+def _return():
+  pass 
+  
+def returnPrime():
+  pass
+
+def _print():
+  pass
+
+def _scan():
+  pass
+
+def _while():
+  pass 
+
+def condition():
+  pass
+
+def relop():
+  pass
   
 def empty():
   pass 
