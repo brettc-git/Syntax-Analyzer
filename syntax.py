@@ -36,3 +36,6 @@ def compound():
 
 def assign():
   pass
+
+def empty():
+  pass 
