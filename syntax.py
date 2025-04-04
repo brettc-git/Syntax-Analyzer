@@ -65,7 +65,7 @@ def returnPrime():
 def _print():
   pass
 
-def _scan():
+def scan():
   pass
 
 def _while():
@@ -76,6 +76,27 @@ def condition():
 
 def relop():
   pass
+
+def expression():
+  pass
+
+def expressionPrime():
+  pass
+
+def term():
+  pass
+
+def termPrime():
+  pass
+
+def factor():
+  pass 
+
+def primary():
+  pass
+
+def primaryPrime():
+  pass 
   
 def empty():
-  pass 
+  print("<Empty> -> epsilon")
