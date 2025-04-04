@@ -35,6 +35,9 @@ def declarationList():
 def declaration():
   print("<Declaration> -> <Qualifier><IDs>")
 
+  qualifier()
+  ids()
+
 def ids():
   print("<IDs> -> <Identifier> | <Identifier>, <IDs>")
 
@@ -54,7 +57,7 @@ def _if():
   pass
 
 def ifPrime():
-  pass
+  print("<If Prime> -> endif | else <Statement> endif")
 
 def _return():
   pass 
