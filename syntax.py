@@ -132,3 +132,19 @@ def primaryPrime():
 
 def empty():
   print("<Empty> -> epsilon")
+
+def syntax_error(expected):
+  raise SyntaxError{f"Syntax Error at line {line_num}: Expected {expected}, got {token_value} ({token_type})")
+  
+def newToken():
+  current_token = lex.getToken()
+  if current_token == expected_type:
+      nextToken()
+  else:
+      syntax_error
+
+def parser(input_code):
+  lex - Lexical(input_code)
+  nextToken()
+  Rat25S()
+
