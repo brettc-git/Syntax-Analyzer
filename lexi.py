@@ -159,25 +159,25 @@ class Lexical:
 
 # Open three files first
 
-filenames = ["test1.txt", "test2.txt", "test3.txt"]
-result = "" #created a string to put all results of each test case into one
-for name in filenames: # Go through each file
-    # val = 1
-    try:
-        with open(name, 'r') as file: # Open file
-            data = file.read()
-            l = Lexical(data)
-            tokens = l.parse()
-            result += name + '\n'
-            result += f"{'token':<15}{'lexeme':<15}\n"
-            result += "-"*30
-            result += '\n'
-            for tokentype, lexeme in tokens:
-                result += f"{tokentype:<15}{lexeme:<15}\n"
+# filenames = ["test1.txt", "test2.txt", "test3.txt"]
+# result = "" #created a string to put all results of each test case into one
+# for name in filenames: # Go through each file
+#     # val = 1
+#     try:
+#         with open(name, 'r') as file: # Open file
+#             data = file.read()
+#             l = Lexical(data)
+#             tokens = l.parse()
+#             result += name + '\n'
+#             result += f"{'token':<15}{'lexeme':<15}\n"
+#             result += "-"*30
+#             result += '\n'
+#             for tokentype, lexeme in tokens:
+#                 result += f"{tokentype:<15}{lexeme:<15}\n"
 
-        # val += 1
-    except FileNotFoundError:
-        print(f"File {name} not found")
+#         # val += 1
+#     except FileNotFoundError:
+#         print(f"File {name} not found")
 
-with open("output.txt", 'w') as file:
-    file.write(result)
+# with open("output.txt", 'w') as file:
+#     file.write(result)

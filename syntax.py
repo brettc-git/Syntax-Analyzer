@@ -9,14 +9,17 @@ class Syntax:
     self.current = self.tokens[0] if input else None # Takes the first character of the input if one exists
 
   def match(self, exp_type, exp_lexeme = None):
+    # Get the current token and expected type and the lexeme
     if self.current is None:
       self.error(f"Expected {exp_type}, but reached end of input")
 
     token_type, lexeme = self.current
 
+    # Throw an error if the token type does not match the expected type
     if token_type != exp_type:
       self.error(f"Expected {exp_type}, but got {token_type}")
 
+    # Throw an error if the lexeme does not match the expected lexeme
     if exp_lexeme is not None and lexeme != exp_lexeme:
       self.error(f"Expected {exp_lexeme}, but got {lexeme}")
 
@@ -37,6 +40,7 @@ class Syntax:
   def syntax_error(expected):
     raise SyntaxError(f"Syntax Error: {expected}")
 
+  # Parsing function
   def parse(self):
     self.Rat25S()
 
@@ -48,6 +52,14 @@ class Syntax:
 
   def Rat25S(self):
     print("<Rat25S> -> $$ <Opt Function Definitions> $$ <Opt Declaration List> $$ <Statement List> $$")
+    self.match("Separator", "$$")
+    self.optFunctionDefinitions()
+    self.match("Separator", "$$")
+    self.optDeclarationList()
+    self.match("Separator", "$$")
+    self.statementList()
+    self.match("Separator", "$$")
+
 
   def optFunctionDefinitions(self):
     print("<Opt Function Definitions> -> <Function Definitions> | <Empty>")
@@ -59,12 +71,18 @@ class Syntax:
     print("<Function Definitions -> <Function> | <Function> <Function Definitions>")
 
     self.function()
-    self.functionDefinitions()
+
+    if self.current and self.current[1] == "function":
+      self.functionDefinitions()
 
   def function(self):
     print("<Function> -> function <Identifier> ( <Opt Parameter List> ) <Opt Declaration List> <Body>")
 
+    self.match("Keyword", "function")
+    self.match("Identifier")
+    self.match("Separator", "(")
     self.optParameterList()
+    self.match("Separator", ")")
     self.optDeclarationList()
     self.body()
 
@@ -76,15 +94,21 @@ class Syntax:
 
   def parameterList(self):
     print("<Parameter List> -> <Parameter> | <Parameter> , <Parameter List>")
+    self.match("Separator", ",")
+    self.parameterList()
 
   def parameter(self):
     print("<Parameter> -> <IDs> <Qualifier>")
+
 
   def qualifier(self):
     print("<Qualifier> -> integer | boolean | real")
 
   def body(self):
     print("<Body> -> { <Statement List> }")
+    self.match("Separator", "{")
+    self.statementList()
+    self.match("Separator", "}")
 
   def optDeclarationList(self):
     print("<Opt Declaration List> -> <Declaration List> | <Empty>")
@@ -141,8 +165,17 @@ class Syntax:
   def returnPrime(self):
     print("<Return Prime> -> ; | <Expression> ;")
 
+    self.returnPrime()
+    self.match("Separator", ";")
+    self.expression()
+    self.match("Separator", ";")
+
   def _print(self):
-    print("<Print> ::= print ( <Expression>);")
+    print("<Print> ::= print ( <Expression>) ;")
+    self.match("Separator", "(")
+    self.expression()
+    self.match("Separator", ")")
+    self.match("Separator", ";")
 
   def scan(self):
     print("<Scan> -> scan(<IDs>);")
@@ -160,6 +193,11 @@ class Syntax:
 
   def relop(self):
     print("<Relop> -> == | != | > | < | <= | =>")
+    if self.current[1] in ["==", "!=" ,">", "<", "<=", ">="]:
+      self.match("Operator")
+    else:
+      self.syntax_error("Relational operator expected.")
+
 
   def expression(self):
     print("<Expression> -> <Term> <Expression Prime>")
@@ -168,9 +206,12 @@ class Syntax:
 
   def expressionPrime(self):
     print("Expression Prime -> +<Term><Expression Prime> | -<Term><Expression Prime> | empty")
-    self.term()
-    self.expressionPrime()
-    self.empty()
+    if self.current and self.current[1] in ["+", "-"]:
+      self.match("Operator")
+      self.term()
+      self.expressionPrime()
+    else:
+      self.empty()
 
   def term(self):
     print("<Term> -> <Factor><Term Prime>")
@@ -186,34 +227,43 @@ class Syntax:
 
   def factor(self):
     print("<Factor> ::= - <Primary> | <Primary>")
+    if self.current and self.current[1] == "-":
+      self.match("Operator")
+      self.primary()
+    else:
+      self.primary()
 
   def primary(self):
     print("<Primary> -> <Identifier> <Primary Prime> | <Integer> | ( <Expression> ) | <Real> | true | false ")
 
   def primaryPrime(self):
+
     print("<Primary Prime> -> ( <IDs> ) | empty")
+
+    self.match("Separator", "(")
+    self.ids()
+    self.match("Separator", ")")
+    self.empty()
 
   def empty(self):
     print("<Empty> -> epsilon")
 
 
-
-# def newToken():
-#   current_token = lexi.getToken()
-#   if current_token == expected_type:
-#       nextToken()
-#   else:
-#       syntax_error
-
-
+# Actual usage of parser
 
 # Create three test files
 filenames = ["test1.txt", "test2.txt", "test3.txt"]
 
-for filename in filenames:
+for name in filenames: # Go through each file
   try:
-    with open(filename, 'r') as file:
-      data = file.read()
+    with open(name, 'r') as file: # Open the file
+      input_text = file.read() # Read the file
 
+    parser = Syntax(input_text)
+    try:
+      parser.parse()
+      print("Syntax Analyzer successfully parsed the file: ", name)
+    except SyntaxError as e:
+      print(f"Error parsing {name}: {e}")
   except FileNotFoundError:
-    print(f"File {filename} not found")
+    print(f"File {name} not found")
