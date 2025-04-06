@@ -193,6 +193,7 @@ class Syntax:
     self.match("Keyword", "return")
     self.returnPrime()
 
+  # Done
   def returnPrime(self):
     print("<Return Prime> -> ; | <Expression> ;")
     if self.current and self.current[1] == ";":
@@ -202,7 +203,7 @@ class Syntax:
       self.match("Separator", ";")
 
   def _print(self):
-    print("<Print> ::= print ( <Expression>) ;")
+    print("<Print> -> print ( <Expression>) ;")
     self.match("Keyword", "print")
     self.match("Separator", "(")
     self.expression()
@@ -278,7 +279,7 @@ class Syntax:
 
   # Done
   def factor(self):
-    print("<Factor> ::= - <Primary> | <Primary>")
+    print("<Factor> -> - <Primary> | <Primary>")
     if self.current and self.current[1] == "-":
       self.match("Operator")
       self.primary()

@@ -1,0 +1,12 @@
+[* Program that takes a boolean input and prints the value for it *]
+
+$$
+boolean val;
+$$
+scan(val)
+if (val) [* Check if true *]
+    print(1);
+else [* Check if false *]
+    print(0);
+endif
+$$

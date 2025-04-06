@@ -1,0 +1,38 @@
+[* Program performs math calculations *]
+
+$$
+function add(a integer, b integer)
+{
+    return a + b;
+}
+
+function subtract(a integer, b integer)
+{
+    return a - b;
+}
+
+function multiply(a integer, b integer)
+{
+    return a * b;
+}
+
+function divide(a integer, b integer)
+{
+    if (b == 0)
+        return 0;
+    else 
+        return a/b;
+    endif
+}
+
+$$
+    integer x, y;
+
+$$
+    scan(x, y);
+    print(add(x, y))
+    print(subtract(x, y))
+    print(multiply(x, y))
+    print(divide(x, y))
+$$
+
