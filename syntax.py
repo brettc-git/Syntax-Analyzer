@@ -377,3 +377,7 @@ for name in filenames: # Go through each file
       print(f"Error parsing {name}: {e}")
   except FileNotFoundError:
     print(f"File {name} not found")
+
+result = ""
+with open("output.txt", 'w') as file:
+  file.write(result)
