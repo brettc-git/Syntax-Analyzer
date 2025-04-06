@@ -36,7 +36,7 @@ class Lexical:
 
     # Checks if current word is identifier
     def is_identifier(self, string):
-        if not string or not string[0].isalpha(): #checks if first char is letter if not return false
+        if not string or not (string[0].isalpha() or string[0] == '_'): #checks if first char is letter if not return false
             return False
         for ch in string:
             if not (ch.isalnum() and ch != '_'):

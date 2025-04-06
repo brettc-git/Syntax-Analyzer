@@ -1,3 +1,4 @@
+import sys
 from lexi import Lexical
 
 class Syntax:
@@ -11,17 +12,17 @@ class Syntax:
   def match(self, exp_type, exp_lexeme = None):
     # Get the current token and expected type and the lexeme
     if self.current is None:
-      self.error(f"Expected {exp_type}, but reached end of input")
+      self.syntax_error(f"Expected {exp_type}, but reached end of input")
 
     token_type, lexeme = self.current
 
     # Throw an error if the token type does not match the expected type
     if token_type != exp_type:
-      self.error(f"Expected {exp_type}, but got {token_type}")
+      self.syntax_error(f"Expected {exp_type}, but got {token_type}")
 
     # Throw an error if the lexeme does not match the expected lexeme
     if exp_lexeme is not None and lexeme != exp_lexeme:
-      self.error(f"Expected {exp_lexeme}, but got {lexeme}")
+      self.syntax_error(f"Expected {exp_lexeme}, but got {lexeme}")
 
     _current = self.current
     self.next()
@@ -114,6 +115,18 @@ class Syntax:
   # CHECK
   def qualifier(self):
     print("<Qualifier> -> integer | boolean | real")
+    if self.current is None:
+      self.syntax_error("Unexpected end of input in <Qualifier>")
+
+    token_type, lexeme = self.current
+    if token_type == "Integer":
+      self.match("Integer")
+    elif token_type == "Boolean":
+      self.match("Boolean")
+    elif token_type == "Real":
+      self.match("Real")
+    else:
+      self.syntax_error("Invalid Token")
 
   def body(self):
     print("<Body> -> { <Statement List> }")
@@ -123,9 +136,18 @@ class Syntax:
 
   def optDeclarationList(self):
     print("<Opt Declaration List> -> <Declaration List> | <Empty>")
+    if self.current and self.current[1] in ["integer", "boolean", "real"]:
+      self.declarationList()
+    else:
+      self.empty()
 
   def declarationList(self):
     print("<Declaration List> -> <Declaration> ; | <Declaration> ; <Declaration List>")
+    self.declaration()
+    self.match("Separator", ";")
+    if self.current and self.current[1] in ["integer", "real", "boolean"]:
+      self.declarationList()
+
 
   def declaration(self):
     print("<Declaration> -> <Qualifier><IDs>")
@@ -136,8 +158,10 @@ class Syntax:
   def ids(self):
     print("<IDs> -> <Identifier> | <Identifier>, <IDs>")
     self.match("Identifier")
-    self.match("Separator", ",")
-    self.ids()
+
+    if self.current and self.current[1] == ",":
+      self.match("Separator", ",")
+      self.ids()
 
   def statementList(self):
     print("<Statement List> -> <Statement> | <Statement> <Statement List>")
@@ -160,16 +184,21 @@ class Syntax:
     self._while()
     # else:
 
+  # Done
   def compound(self):
     print("<Compound> -> { <Statement List> }")
     self.match("Separator", "{")
     self.statementList()
     self.match("Separator", "}")
 
+  # Done
   def assign(self):
     print("<Assign> -> <Identifier> -> <Expression>")
+    self.match("Identifier")
+    self.match("Separator", "->")
+    self.expression()
 
-
+  # Done
   def _if(self):
     print("<If> -> if(<Condition>)<Statement> <If Prime>")
     self.match("Keyword", "if")
@@ -182,10 +211,12 @@ class Syntax:
   def ifPrime(self):
     print("<If Prime> -> endif | else <Statement> endif")
 
-    self.match("Keyword", "endif")
-    self.match("Keyword", "else")
-    self.statement()
-    self.match("Keyword", "endif")
+    if self.current and self.current[1] == "endif":
+      self.match("Keyword", "endif")
+    else:
+      self.match("Keyword", "else")
+      self.statement()
+      self.match("Keyword", "endif")
 
   # Done
   def _return(self):
@@ -210,9 +241,10 @@ class Syntax:
     self.match("Separator", ")")
     self.match("Separator", ";")
 
-  # CHECK
+  # Done
   def scan(self):
     print("<Scan> -> scan(<IDs>);")
+    self.match("Keyword", "scan")
     self.match("Separator", "(")
     self.ids()
     self.match("Separator", ")")
@@ -329,7 +361,7 @@ class Syntax:
 
 # Actual usage of parser
 
-# Create three test files
+# Read three test files
 filenames = ["test1.txt", "test2.txt", "test3.txt"]
 
 for name in filenames: # Go through each file
