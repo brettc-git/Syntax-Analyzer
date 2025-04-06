@@ -4,24 +4,48 @@ class Syntax:
   def __init__(self, input):
     self.input = input
     self.lexer = Lexical(input)
-    self.pos = 0
-    self.line = 1 # First line
-    self.column = 1 # First letter
-    self.current = self.input[0] if input else None # Takes the first character of the input if one exists
+    self.tokens = self.lexer.parse() # Parse all tokens from input
+    self.current_index = 0
+    self.current = self.tokens[0] if input else None # Takes the first character of the input if one exists
+
+  def match(self, exp_type, exp_lexeme = None):
+    if self.current is None:
+      self.error(f"Expected {exp_type}, but reached end of input")
+
+    token_type, lexeme = self.current
+
+    if token_type != exp_type:
+      self.error(f"Expected {exp_type}, but got {token_type}")
+
+    if exp_lexeme is not None and lexeme != exp_lexeme:
+      self.error(f"Expected {exp_lexeme}, but got {lexeme}")
+
+    _current = self.current
+    self.next()
+    return _current
 
   def next(self):
-    self.pos += 1
-    self.column += 1
+    self.current_index += 1
 
-    if self.pos >= len(self.input):
-      self.current = None
+    if self.current_index < len(self.tokens):
+      self.current = self.tokens[self.current_index]
     else:
-      self.current = self.input[self.pos]
-      if self.current == '\n':
-        self.line += 1
-        self.column = 0
+      # If there are no more tokens, return None
+      self.current = None
 
+  # Error function
+  def syntax_error(expected):
+    raise SyntaxError(f"Syntax Error: {expected}")
+
+  def parse(self):
+    self.Rat25S()
+
+    # In the event that all of the input tokens have been parsed but there are still tokens left
+    if self.current is not None:
+      self.syntax_error("Unexpected tokens at end of input.")
 # Functions for each syntax rule
+
+
   def Rat25S(self):
     print("<Rat25S> -> $$ <Opt Function Definitions> $$ <Opt Declaration List> $$ <Statement List> $$")
 
@@ -39,6 +63,10 @@ class Syntax:
 
   def function(self):
     print("<Function> -> function <Identifier> ( <Opt Parameter List> ) <Opt Declaration List> <Body>")
+
+    self.optParameterList()
+    self.optDeclarationList()
+    self.body()
 
   def optParameterList(self):
     print("<Opt Parameter List> -> <Parameter List> | <Empty>")
@@ -168,9 +196,7 @@ class Syntax:
   def empty(self):
     print("<Empty> -> epsilon")
 
-  # Error function
-  def syntax_error(expected):
-    raise SyntaxError(f"Syntax Error at line {line_num}: Expected {expected}, got {token_value} ({token_type})")
+
 
 # def newToken():
 #   current_token = lexi.getToken()
