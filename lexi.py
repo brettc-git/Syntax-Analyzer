@@ -39,7 +39,7 @@ class Lexical:
         if not string or not (string[0].isalpha() or string[0] == '_'): #checks if first char is letter if not return false
             return False
         for ch in string:
-            if not (ch.isalnum() and ch != '_'):
+            if not (ch.isalnum() and ch == '_'):
                 return False
         if string in self.keywords:
             return False # Keyword != Identifier

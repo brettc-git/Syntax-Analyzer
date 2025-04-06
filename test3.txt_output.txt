@@ -1,0 +1,77 @@
+Analyzing test3.txt...
+==================================================
+
+Tokens and Lexemes:
+Token          Lexeme         
+------------------------------
+Separator      $$             
+Keyword        function       
+Identifier     fibonacci      
+Separator      (              
+Identifier     n              
+Keyword        integer        
+Separator      )              
+Separator      {              
+Keyword        if             
+Separator      (              
+Identifier     n              
+Operator       <=             
+Integer        1              
+Separator      )              
+Keyword        return         
+Identifier     n              
+Separator      ;              
+Keyword        endif          
+Keyword        return         
+Identifier     fibonacci      
+Separator      (              
+Identifier     n              
+Operator       -              
+Integer        1              
+Separator      )              
+Operator       +              
+Identifier     fibonacci      
+Separator      (              
+Identifier     n              
+Operator       -              
+Integer        2              
+Separator      )              
+Separator      ;              
+Separator      }              
+Separator      $$             
+Keyword        integer        
+Identifier     n              
+Separator      ,              
+Identifier     i              
+Separator      ;              
+Separator      $$             
+Identifier     i              
+Operator       =              
+Integer        0              
+Keyword        while          
+Separator      (              
+Identifier     i              
+Operator       <              
+Identifier     n              
+Separator      )              
+Separator      {              
+Keyword        print          
+Separator      (              
+Identifier     fibonacci      
+Separator      (              
+Identifier     i              
+Separator      )              
+Separator      )              
+Separator      ;              
+Identifier     i              
+Operator       =              
+Identifier     i              
+Operator       +              
+Integer        1              
+Separator      ;              
+Separator      }              
+Keyword        endwhile       
+Separator      $$             
+
+ SYNTAX ERROR: 
+Syntax Error: Expected Separator, but got Operator

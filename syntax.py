@@ -8,6 +8,8 @@ class Syntax:
     self.tokens = self.lexer.parse() # Parse all tokens from input
     self.current_index = 0
     self.current = self.tokens[0] if input else None # Takes the first character of the input if one exists
+    self.parsed_tokens = []
+    self.production_rules = []
 
   def match(self, exp_type, exp_lexeme = None):
     # Get the current token and expected type and the lexeme
@@ -23,6 +25,8 @@ class Syntax:
     # Throw an error if the lexeme does not match the expected lexeme
     if exp_lexeme is not None and lexeme != exp_lexeme:
       self.syntax_error(f"Expected {exp_lexeme}, but got {lexeme}")
+
+    self.parsed_tokens.append((token_type, lexeme))
 
     _current = self.current
     self.next()
@@ -41,6 +45,11 @@ class Syntax:
   def syntax_error(self, expected):
     raise SyntaxError(f"Syntax Error: {expected}")
 
+  def add_production(self, rule):
+    print(rule)
+    # Add a production rule to the syntax
+    self.production_rules.append(rule)
+
   # Parsing function
   def parse(self):
     self.Rat25S()
@@ -49,12 +58,14 @@ class Syntax:
     if self.current is not None:
       self.syntax_error("Unexpected tokens at end of input.")
 
+    return self.parsed_tokens, self.production_rules
 
 # Functions for each syntax rule
 
-  # Done
+
   def Rat25S(self):
-    print("<Rat25S> -> $$ <Opt Function Definitions> $$ <Opt Declaration List> $$ <Statement List> $$")
+    self.add_production("<Rat25S> -> $$ <Opt Function Definitions> $$ <Opt Declaration List> $$ <Statement List> $$")
+
     self.match("Separator", "$$")
     self.optFunctionDefinitions()
     self.match("Separator", "$$")
@@ -63,17 +74,18 @@ class Syntax:
     self.statementList()
     self.match("Separator", "$$")
 
-  # Done
+  # <Opt Function Definitions> -> <Function Definitions> | <Empty>
   def optFunctionDefinitions(self):
-    print("<Opt Function Definitions> -> <Function Definitions> | <Empty>")
     if self.current and self.current[1] == "function":
+      self.add_production("<Opt Function Definitions> -> <Function Definitions> | <Empty>")
       self.functionDefinitions()
     else:
+      self.add_production("<Opt Function Definitions> -> <Empty>")
       self.empty()
 
 
   def functionDefinitions(self):
-    print("<Function Definitions -> <Function> | <Function> <Function Definitions>")
+    self.add_production("<Function Definitions -> <Function> | <Function> <Function Definitions>")
 
     self.function()
 
@@ -81,7 +93,7 @@ class Syntax:
       self.functionDefinitions()
 
   def function(self):
-    print("<Function> -> function <Identifier> ( <Opt Parameter List> ) <Opt Declaration List> <Body>")
+    self.add_production("<Function> -> function <Identifier> ( <Opt Parameter List> ) <Opt Declaration List> <Body>")
 
     self.match("Keyword", "function")
     self.match("Identifier")
@@ -91,72 +103,78 @@ class Syntax:
     self.optDeclarationList()
     self.body()
 
+  # <Opt Parameter List> -> <Parameter List> | <Empty>
   def optParameterList(self):
-    print("<Opt Parameter List> -> <Parameter List> | <Empty>")
-    if self.current and self.current[1] == "identifier":
+    if self.current and self.current[0] == "Identifier":
+      self.add_production("<Opt Parameter List> -> <Parameter List>")
       self.parameterList()
     else:
+      self.add_production("<Opt Parameter List> -> <Empty>")
       self.empty()
 
   def parameterList(self):
-    print("<Parameter List> -> <Parameter> | <Parameter> , <Parameter List>")
+    self.add_production("<Parameter List> -> <Parameter> | <Parameter> , <Parameter List>")
 
     self.parameter()
     if self.current and self.current[1] == ",":
       self.match("Separator", ",")
       self.parameterList()
 
-  # Done
+
   def parameter(self):
-    print("<Parameter> -> <IDs> <Qualifier>")
+    self.add_production("<Parameter> -> <IDs> <Qualifier>")
+
     self.ids()
     self.qualifier()
 
-  # CHECK
+
   def qualifier(self):
-    print("<Qualifier> -> integer | boolean | real")
+    self.add_production("<Qualifier> -> integer | boolean | real")
+
     if self.current is None:
       self.syntax_error("Unexpected end of input in <Qualifier>")
 
     token_type, lexeme = self.current
-    if token_type == "Integer":
-      self.match("Integer")
-    elif token_type == "Boolean":
-      self.match("Boolean")
-    elif token_type == "Real":
-      self.match("Real")
+    if token_type == "Keyword" and lexeme in ["integer", "boolean", "real"]:
+      self.match("Keyword", lexeme)
     else:
-      self.syntax_error("Invalid Token")
+      self.syntax_error("Error: expected 'integer', 'boolean', or 'real' in <Qualifier>")
 
   def body(self):
-    print("<Body> -> { <Statement List> }")
+    self.add_production("<Body> -> { <Statement List> }")
+
     self.match("Separator", "{")
     self.statementList()
     self.match("Separator", "}")
 
+  #3 <Opt Declaration List> -> <Declaration List> | <Empty>
   def optDeclarationList(self):
-    print("<Opt Declaration List> -> <Declaration List> | <Empty>")
-    if self.current and self.current[1] in ["integer", "boolean", "real"]:
+    if self.current and self.current[0] == "Keyword" and self.current[1] in ["integer", "boolean", "real"]:
       self.declarationList()
+      self.add_production("<Opt Declaration List> -> <Declaration List>")
     else:
       self.empty()
+      self.add_production("<Opt Declaration List> -> <Empty>")
 
   def declarationList(self):
-    print("<Declaration List> -> <Declaration> ; | <Declaration> ; <Declaration List>")
+    self.add_production("<Declaration List> -> <Declaration> ; | <Declaration> ; <Declaration List>")
+
     self.declaration()
     self.match("Separator", ";")
-    if self.current and self.current[1] in ["integer", "real", "boolean"]:
+
+    if self.current and self.current[0] == "Keyword" and self.current[1] in ["integer", "real", "boolean"]:
       self.declarationList()
 
 
   def declaration(self):
-    print("<Declaration> -> <Qualifier><IDs>")
+    self.add_production("<Declaration> -> <Qualifier><IDs>")
 
     self.qualifier()
     self.ids()
 
   def ids(self):
-    print("<IDs> -> <Identifier> | <Identifier>, <IDs>")
+    self.add_production("<IDs> -> <Identifier> | <Identifier>, <IDs>")
+
     self.match("Identifier")
 
     if self.current and self.current[1] == ",":
@@ -164,43 +182,64 @@ class Syntax:
       self.ids()
 
   def statementList(self):
-    print("<Statement List> -> <Statement> | <Statement> <Statement List>")
+    self.add_production("<Statement List> -> <Statement> | <Statement> <Statement List>")
+
+    self.statement()
+
+    if self.current and self.current[0] in ["Identifier", "Separator", "Keyword"] and \
+      (self.current[1] not in ["}", "endif", "endwhile"]):
+        self.statementList()
 
   def statement(self):
-    print("<Statement> -> <Compound> | <Assign> | <If> | <Return> | <Print> | <Scan> | <While>")
+    self.add_production("<Statement> -> <Compound> | <Assign> | <If> | <Return> | <Print> | <Scan> | <While>")
+
+    if not self.current:
+      self.syntax_error("Unexpected end of input in <Statement>")
+
+    token_type, lexeme = self.current
+
+    # <Compound>
+    if token_type == "Separator" and lexeme == "{":
+      self.compound()
+
+    # <Assign>
+    elif token_type == "Identifier":
+      self.assign()
+
+    # <If>, <Return>, <Print>, <Scan>, <While>
+    elif token_type == "Keyword":
+      if lexeme == "if":
+        self._if()
+      elif lexeme == "return":
+        self._return()
+      elif lexeme == "print":
+        self._print()
+      elif lexeme == "scan":
+        self.scan()
+      elif lexeme == "while":
+        self._while()
+      else:
+        self.syntax_error("Unexpected keyword in <Statement>")
+    else:
+      self.syntax_error("Unexpected token for <Statement>")
 
 
-    self.compound()
-    self.assign()
-    # if current lexeme is "if"
-    self._if()
-    # if current lexeme is "return"
-    self._return()
-    # if current lexeme is "print"
-    self._print()
-    # if current lexeme is "scan"
-    self.scan()
-    # if current lexeme is "while"
-    self._while()
-    # else:
-
-  # Done
   def compound(self):
-    print("<Compound> -> { <Statement List> }")
+    self.add_production("<Compound> -> { <Statement List> }")
     self.match("Separator", "{")
     self.statementList()
     self.match("Separator", "}")
 
-  # Done
+
   def assign(self):
-    print("<Assign> -> <Identifier> -> <Expression>")
+    self.add_production("<Assign> -> <Identifier> = <Expression>")
     self.match("Identifier")
-    self.match("Separator", "->")
+    self.match("Operator", "=")
     self.expression()
 
-  # Done
+
   def _if(self):
-    print("<If> -> if(<Condition>)<Statement> <If Prime>")
+    self.add_production("<If> -> if(<Condition>)<Statement> <If Prime>")
     self.match("Keyword", "if")
     self.match("Separator", "(")
     self.condition()
@@ -209,50 +248,55 @@ class Syntax:
     self.ifPrime()
 
   def ifPrime(self):
-    print("<If Prime> -> endif | else <Statement> endif")
-
+    # <If Prime> -> endif | else <Statement> endif")
     if self.current and self.current[1] == "endif":
+      self.add_production("<If Prime> -> endif")
       self.match("Keyword", "endif")
     else:
+      self.add_production("<If Prime> -> else <Statement> endif")
       self.match("Keyword", "else")
       self.statement()
       self.match("Keyword", "endif")
 
-  # Done
+
   def _return(self):
-    print("<Return> -> return <Return Prime>")
+    self.add_production("<Return> -> return <Return Prime>")
     self.match("Keyword", "return")
     self.returnPrime()
 
-  # Done
+
   def returnPrime(self):
-    print("<Return Prime> -> ; | <Expression> ;")
     if self.current and self.current[1] == ";":
+      self.add_production("<Return Prime> -> ;")
       self.match("Separator", ";")
     else:
+      self.add_production("<Return Prime> -> <Expression> ;")
       self.expression()
       self.match("Separator", ";")
 
   def _print(self):
-    print("<Print> -> print ( <Expression>) ;")
+    self.add_production("<Print> -> print ( <Expression>) ;")
+
     self.match("Keyword", "print")
     self.match("Separator", "(")
     self.expression()
     self.match("Separator", ")")
     self.match("Separator", ";")
 
-  # Done
+
   def scan(self):
-    print("<Scan> -> scan(<IDs>);")
+    self.add_production("<Scan> -> scan(<IDs>);")
+
     self.match("Keyword", "scan")
     self.match("Separator", "(")
     self.ids()
     self.match("Separator", ")")
     self.match("Separator", ";")
 
-  # Done
+
   def _while(self):
-    print("<While> -> while ( <Condition> ) <Statement> endwhile")
+    self.add_production("<While> -> while ( <Condition> ) <Statement> endwhile")
+
     self.match("Keyword", "while")
     self.match("Separator", "(")
     self.condition()
@@ -260,67 +304,75 @@ class Syntax:
     self.statement()
     self.match("Keyword", "endwhile")
 
-  # Done
+
   def condition(self):
-    print("<Condition> -> <Expression> <Relop> <Expression>")
+    self.add_production("<Condition> -> <Expression> <Relop> <Expression>")
+
     self.expression()
     self.relop()
     self.expression()
 
-  # Done
+
   def relop(self):
-    print("<Relop> -> == | != | > | < | <= | =>")
-    if self.current[1] in ["==", "!=" ,">", "<", "<=", ">="]:
-      self.match("Operator")
+    self.add_production("<Relop> -> == | != | > | < | <= | =>")
+    if self.current and self.current[0] == "Operator" and self.current[1] in ["==", "!=", ">", "<", "<=", ">="]:
+      self.match("Operator", self.current[1])
     else:
       self.syntax_error("Relational operator expected.")
 
 
-  # Done
+
   def expression(self):
-    print("<Expression> -> <Term> <Expression Prime>")
+    self.add_production("<Expression> -> <Term> <Expression Prime>")
     self.term()
     self.expressionPrime()
 
-  # Done
+  # Expression Prime -> + <Term> <Expression Prime> | - <Term> <Expression Prime> | <Empty>
   def expressionPrime(self):
-    print("Expression Prime -> +<Term><Expression Prime> | -<Term><Expression Prime> | empty")
-    if self.current and self.current[1] in ["+", "-"]:
-      self.match("Operator")
+    if self.current and self.current[0] == "Operator" and self.current[1] in ["+", "-"]:
+      self.add_production("Expression Prime -> +<Term><Expression Prime> | -<Term><Expression Prime>")
+
+      self.match("Operator", self.current[1])
       self.term()
       self.expressionPrime()
     else:
+      self.add_production("Expression Prime -> <Empty>")
       self.empty()
 
-  # Done
+
   def term(self):
-    print("<Term> -> <Factor><Term Prime>")
+    self.add_production("<Term> -> <Factor><Term Prime>")
     self.factor()
     self.termPrime()
 
-  # Done
+  # <Term Prime> -> * <Factor> <Term Prime> | / <Factor> <Term Prime> | <Empty>
   def termPrime(self):
-    print("<Term Prime> -> * <Factor> <Term Prime> | / <Factor> <Term Prime> | empty")
-    if self.current and self.current[1] in ["*", "/"]:
-      self.match("Operator")
+    if self.current and self.current[0] == "Operator" and self.current[1] in ["*", "/"]:
+      self.add_production("<Term Prime> -> * <Factor> <Term Prime> | / <Factor> <Term Prime>")
+
+      self.match("Operator", self.current[1])
       self.factor()
       self.termPrime()
     else:
+      self.add_production("<Term Prime> -> <Empty>")
       self.empty()
 
 
-  # Done
+  # <Factor> -> - <Primary> | <Primary>
   def factor(self):
-    print("<Factor> -> - <Primary> | <Primary>")
-    if self.current and self.current[1] == "-":
-      self.match("Operator")
+    self.add_production("<Factor> -> - <Primary> | <Primary>")
+    if self.current and self.current[0] == "Operator" and self.current[1] == "-":
+      self.add_production("<Factor> -> - <Primary>")
+      self.match("Operator", "-")
       self.primary()
     else:
+      self.add_production("<Factor> -> <Primary>")
       self.primary()
 
-  # Done
+
   def primary(self):
-    print("<Primary> -> <Identifier> <Primary Prime> | <Integer> | ( <Expression> ) | <Real> | true | false ")
+    self.add_production("<Primary> -> <Identifier> <Primary Prime> | <Integer> | ( <Expression> ) | <Real> | true | false ")
+
     if self.current is None:
       self.syntax_error("Unexpected end of input in <Primary>")
 
@@ -337,47 +389,86 @@ class Syntax:
       self.match("Separator", ")")
     elif token_type == "Real":
       self.match("Real")
-    elif token_type == "Keyword" and lexeme in ["true", "false"]:
-      self.match("Keyword", lexeme)
+    elif token_type == "Boolean":
+      self.match("Boolean")
     else:
-      self.syntax_error("Invalid <Primary>")
+      self.syntax_error(f"Invalid <Primary>: {token_type}, {lexeme}")
 
-  # Done
+
+  # <Primary Prime> -> ( <IDs> ) | <Empty> )
   def primaryPrime(self):
-
-    print("<Primary Prime> -> ( <IDs> ) | empty")
-
-    if self.current and self.current[1] == "(":
+    if self.current and self.current[0] == "Separator" and self.current[1] == "(":
+      self.add_production("<Primary Prime> -> ( <IDs> )")
       self.match("Separator", "(")
       self.ids()
       self.match("Separator", ")")
     else:
+      self.add_production("<Primary Prime> -> <Empty>")
       self.empty()
 
-  # Done
+
   def empty(self):
-    print("<Empty> -> epsilon")
+    self.add_production("<Empty> -> epsilon")
 
 
 # Actual usage of parser
+def main():
+  # Read three test files
+  filenames = ["test1.txt", "test2.txt", "test3.txt"]
 
-# Read three test files
-filenames = ["test1.txt", "test2.txt", "test3.txt"]
-
-for name in filenames: # Go through each file
-  try:
-    with open(name, 'r') as file: # Open the file
-      input_text = file.read() # Read the file
-
-    parser = Syntax(input_text)
+  for name in filenames: # Go through each file
     try:
-      parser.parse()
-      print("Syntax Analyzer successfully parsed the file: ", name)
-    except SyntaxError as e:
-      print(f"Error parsing {name}: {e}")
-  except FileNotFoundError:
-    print(f"File {name} not found")
+      with open(name, 'r') as file: # Open the file
+        input_text = file.read() # Read the file
 
-result = ""
-with open("output.txt", 'w') as file:
-  file.write(result)
+      # Get lexical tokens using lexi.py
+      lexer = Lexical(input_text)
+
+      tokens = lexer.parse()
+
+      parser = Syntax(input_text)
+
+
+      try:
+        parsed_tokens, production_rules = parser.parse()
+
+        output_filename = f"{name}_output.txt"
+        with open(output_filename, "w") as output_file:
+
+          output_file.write("Tokens and Lexemes:\n")
+          output_file.write(f"{'Token':<15}{'Lexeme':<15}\n")
+          output_file.write("-"*30 + "\n")
+          for token_type, lexeme in tokens:
+            output_file.write(f"{token_type:<15}{lexeme:<15}\n")
+
+          output_file.write("\nProduction Rules: \n")
+          output_file.write("-"*50 + "\n")
+          for i, rule in enumerate(production_rules, 1):
+            output_file.write(f"Rule {i}: {rule}\n")
+
+          output_file.write(f"\nSYNTAX ERROR: \n{e}\n")
+
+        print("Syntax Analyzer successfully parsed the file: ", name)
+        print(f"Results saved to: {output_filename}")
+
+      except SyntaxError as e:
+        print(f"Error parsing file {name}: {e}")
+
+        output_filename = f"{name}_output.txt"
+        with open(output_filename, "w") as output_file:
+          output_file.write(f"Analyzing {name}...\n")
+          output_file.write("="*50 + "\n\n")
+
+          output_file.write("Tokens and Lexemes:\n")
+          output_file.write(f"{'Token':<15}{'Lexeme':<15}\n")
+          output_file.write("-"*30 + "\n")
+          for token_type, lexeme in tokens:
+            output_file.write(f"{token_type:<15}{lexeme:<15}\n")
+
+          output_file.write(f"\n SYNTAX ERROR: \n{e}\n")
+
+    except FileNotFoundError:
+      print(f"File {name} not found")
+
+if __name__ == "__main__":
+  main()
