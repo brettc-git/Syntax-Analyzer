@@ -37,7 +37,7 @@ class Syntax:
       self.current = None
 
   # Error function
-  def syntax_error(expected):
+  def syntax_error(self, expected):
     raise SyntaxError(f"Syntax Error: {expected}")
 
   # Parsing function
@@ -47,9 +47,11 @@ class Syntax:
     # In the event that all of the input tokens have been parsed but there are still tokens left
     if self.current is not None:
       self.syntax_error("Unexpected tokens at end of input.")
+
+
 # Functions for each syntax rule
 
-
+  # Done
   def Rat25S(self):
     print("<Rat25S> -> $$ <Opt Function Definitions> $$ <Opt Declaration List> $$ <Statement List> $$")
     self.match("Separator", "$$")
@@ -60,12 +62,14 @@ class Syntax:
     self.statementList()
     self.match("Separator", "$$")
 
-
+  # Done
   def optFunctionDefinitions(self):
     print("<Opt Function Definitions> -> <Function Definitions> | <Empty>")
+    if self.current and self.current[1] == "function":
+      self.functionDefinitions()
+    else:
+      self.empty()
 
-    self.functionDefinitions()
-    self.empty()
 
   def functionDefinitions(self):
     print("<Function Definitions -> <Function> | <Function> <Function Definitions>")
@@ -88,19 +92,26 @@ class Syntax:
 
   def optParameterList(self):
     print("<Opt Parameter List> -> <Parameter List> | <Empty>")
-
-    self.parameterList()
-    self.empty()
+    if self.current and self.current[1] == "identifier":
+      self.parameterList()
+    else:
+      self.empty()
 
   def parameterList(self):
     print("<Parameter List> -> <Parameter> | <Parameter> , <Parameter List>")
-    self.match("Separator", ",")
-    self.parameterList()
 
+    self.parameter()
+    if self.current and self.current[1] == ",":
+      self.match("Separator", ",")
+      self.parameterList()
+
+  # Done
   def parameter(self):
     print("<Parameter> -> <IDs> <Qualifier>")
+    self.ids()
+    self.qualifier()
 
-
+  # CHECK
   def qualifier(self):
     print("<Qualifier> -> integer | boolean | real")
 
@@ -124,6 +135,9 @@ class Syntax:
 
   def ids(self):
     print("<IDs> -> <Identifier> | <Identifier>, <IDs>")
+    self.match("Identifier")
+    self.match("Separator", ",")
+    self.ids()
 
   def statementList(self):
     print("<Statement List> -> <Statement> | <Statement> <Statement List>")
@@ -148,6 +162,9 @@ class Syntax:
 
   def compound(self):
     print("<Compound> -> { <Statement List> }")
+    self.match("Separator", "{")
+    self.statementList()
+    self.match("Separator", "}")
 
   def assign(self):
     print("<Assign> -> <Identifier> -> <Expression>")
@@ -155,42 +172,69 @@ class Syntax:
 
   def _if(self):
     print("<If> -> if(<Condition>)<Statement> <If Prime>")
+    self.match("Keyword", "if")
+    self.match("Separator", "(")
+    self.condition()
+    self.match("Separator", ")")
+    self.statement()
+    self.ifPrime()
 
   def ifPrime(self):
     print("<If Prime> -> endif | else <Statement> endif")
 
+    self.match("Keyword", "endif")
+    self.match("Keyword", "else")
+    self.statement()
+    self.match("Keyword", "endif")
+
+  # Done
   def _return(self):
     print("<Return> -> return <Return Prime>")
+    self.match("Keyword", "return")
+    self.returnPrime()
 
   def returnPrime(self):
     print("<Return Prime> -> ; | <Expression> ;")
-
-    self.returnPrime()
-    self.match("Separator", ";")
-    self.expression()
-    self.match("Separator", ";")
+    if self.current and self.current[1] == ";":
+      self.match("Separator", ";")
+    else:
+      self.expression()
+      self.match("Separator", ";")
 
   def _print(self):
     print("<Print> ::= print ( <Expression>) ;")
+    self.match("Keyword", "print")
     self.match("Separator", "(")
     self.expression()
     self.match("Separator", ")")
     self.match("Separator", ";")
 
+  # CHECK
   def scan(self):
     print("<Scan> -> scan(<IDs>);")
+    self.match("Separator", "(")
+    self.ids()
+    self.match("Separator", ")")
+    self.match("Separator", ";")
 
+  # Done
   def _while(self):
     print("<While> -> while ( <Condition> ) <Statement> endwhile")
+    self.match("Keyword", "while")
+    self.match("Separator", "(")
     self.condition()
+    self.match("Separator", ")")
     self.statement()
+    self.match("Keyword", "endwhile")
 
+  # Done
   def condition(self):
     print("<Condition> -> <Expression> <Relop> <Expression>")
     self.expression()
     self.relop()
     self.expression()
 
+  # Done
   def relop(self):
     print("<Relop> -> == | != | > | < | <= | =>")
     if self.current[1] in ["==", "!=" ,">", "<", "<=", ">="]:
@@ -199,11 +243,13 @@ class Syntax:
       self.syntax_error("Relational operator expected.")
 
 
+  # Done
   def expression(self):
     print("<Expression> -> <Term> <Expression Prime>")
     self.term()
     self.expressionPrime()
 
+  # Done
   def expressionPrime(self):
     print("Expression Prime -> +<Term><Expression Prime> | -<Term><Expression Prime> | empty")
     if self.current and self.current[1] in ["+", "-"]:
@@ -213,18 +259,24 @@ class Syntax:
     else:
       self.empty()
 
+  # Done
   def term(self):
     print("<Term> -> <Factor><Term Prime>")
-
     self.factor()
     self.termPrime()
 
+  # Done
   def termPrime(self):
     print("<Term Prime> -> * <Factor> <Term Prime> | / <Factor> <Term Prime> | empty")
+    if self.current and self.current[1] in ["*", "/"]:
+      self.match("Operator")
+      self.factor()
+      self.termPrime()
+    else:
+      self.empty()
 
-    self.empty()
 
-
+  # Done
   def factor(self):
     print("<Factor> ::= - <Primary> | <Primary>")
     if self.current and self.current[1] == "-":
@@ -233,18 +285,43 @@ class Syntax:
     else:
       self.primary()
 
+  # Done
   def primary(self):
     print("<Primary> -> <Identifier> <Primary Prime> | <Integer> | ( <Expression> ) | <Real> | true | false ")
+    if self.current is None:
+      self.syntax_error("Unexpected end of input in <Primary>")
 
+    token_type, lexeme = self.current
+
+    if token_type == "Identifier":
+      self.match("Identifier")
+      self.primaryPrime()
+    elif token_type == "Integer":
+      self.match("Integer")
+    elif token_type == "Separator" and lexeme == "(":
+      self.match("Separator", "(")
+      self.expression()
+      self.match("Separator", ")")
+    elif token_type == "Real":
+      self.match("Real")
+    elif token_type == "Keyword" and lexeme in ["true", "false"]:
+      self.match("Keyword", lexeme)
+    else:
+      self.syntax_error("Invalid <Primary>")
+
+  # Done
   def primaryPrime(self):
 
     print("<Primary Prime> -> ( <IDs> ) | empty")
 
-    self.match("Separator", "(")
-    self.ids()
-    self.match("Separator", ")")
-    self.empty()
+    if self.current and self.current[1] == "(":
+      self.match("Separator", "(")
+      self.ids()
+      self.match("Separator", ")")
+    else:
+      self.empty()
 
+  # Done
   def empty(self):
     print("<Empty> -> epsilon")
 
