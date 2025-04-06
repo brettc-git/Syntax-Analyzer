@@ -1,77 +1,92 @@
-Analyzing test3.txt...
+Analyzing test3.txt:
 ==================================================
 
-Tokens and Lexemes:
-Token          Lexeme         
-------------------------------
-Separator      $$             
-Keyword        function       
-Identifier     fibonacci      
-Separator      (              
-Identifier     n              
-Keyword        integer        
-Separator      )              
-Separator      {              
-Keyword        if             
-Separator      (              
-Identifier     n              
-Operator       <=             
-Integer        1              
-Separator      )              
-Keyword        return         
-Identifier     n              
-Separator      ;              
-Keyword        endif          
-Keyword        return         
-Identifier     fibonacci      
-Separator      (              
-Identifier     n              
-Operator       -              
-Integer        1              
-Separator      )              
-Operator       +              
-Identifier     fibonacci      
-Separator      (              
-Identifier     n              
-Operator       -              
-Integer        2              
-Separator      )              
-Separator      ;              
-Separator      }              
-Separator      $$             
-Keyword        integer        
-Identifier     n              
-Separator      ,              
-Identifier     i              
-Separator      ;              
-Separator      $$             
-Identifier     i              
-Operator       =              
-Integer        0              
-Keyword        while          
-Separator      (              
-Identifier     i              
-Operator       <              
-Identifier     n              
-Separator      )              
-Separator      {              
-Keyword        print          
-Separator      (              
-Identifier     fibonacci      
-Separator      (              
-Identifier     i              
-Separator      )              
-Separator      )              
-Separator      ;              
-Identifier     i              
-Operator       =              
-Identifier     i              
-Operator       +              
-Integer        1              
-Separator      ;              
-Separator      }              
-Keyword        endwhile       
-Separator      $$             
+      <Rat25S> -> $$ <Opt Function Definitions> $$ <Opt Declaration List> $$ <Statement List> $$
+Token: Separator       Lexeme: $$
+      <Opt Function Definitions> -> <Function Definitions>
+      <Function Definitions -> <Function> | <Function> <Function Definitions>
+      <Function> -> function <Identifier> ( <Opt Parameter List> ) <Opt Declaration List> <Body>
+Token: Keyword         Lexeme: function
+Token: Identifier      Lexeme: fibonacci
+Token: Separator       Lexeme: (
+      <Opt Parameter List> -> <Parameter List>
+      <Parameter List> -> <Parameter> | <Parameter> , <Parameter List>
+      <Parameter> -> <IDs> <Qualifier>
+      <IDs> -> <Identifier> | <Identifier>, <IDs>
+Token: Identifier      Lexeme: n
+      <Qualifier> -> integer | boolean | real
+Token: Keyword         Lexeme: integer
+Token: Separator       Lexeme: )
+      <Opt Declaration List> -> <Empty>
+      <Empty> -> epsilon
+      <Body> -> { <Statement List> }
+Token: Separator       Lexeme: {
+      <Statement List> -> <Statement> | <Statement> <Statement List>
+      <Statement> -> <Compound> | <Assign> | <If> | <Return> | <Print> | <Scan> | <While>
+      <If> -> if(<Condition>)<Statement> <If Prime>
+Token: Keyword         Lexeme: if
+Token: Separator       Lexeme: (
+      <Condition> -> <Expression> <Relop> <Expression>
+      <Expression> -> <Term> <Expression Prime>
+      <Term> -> <Factor><Term Prime>
+      <Factor> -> - <Primary> | <Primary>
+      <Factor> -> <Primary>
+      <Primary> -> <Identifier> <Primary Prime> | <Integer> | ( <Expression> ) | <Real> | true | false 
+Token: Identifier      Lexeme: n
+      <Primary Prime> -> <Empty>
+      <Empty> -> epsilon
+      <Term Prime> -> <Empty>
+      <Empty> -> epsilon
+      Expression Prime -> <Empty>
+      <Empty> -> epsilon
+      <Relop> -> == | != | > | < | <= | =>
+Token: Operator        Lexeme: <=
+      <Expression> -> <Term> <Expression Prime>
+      <Term> -> <Factor><Term Prime>
+      <Factor> -> - <Primary> | <Primary>
+      <Factor> -> <Primary>
+      <Primary> -> <Identifier> <Primary Prime> | <Integer> | ( <Expression> ) | <Real> | true | false 
+Token: Integer         Lexeme: 1
+      <Term Prime> -> <Empty>
+      <Empty> -> epsilon
+      Expression Prime -> <Empty>
+      <Empty> -> epsilon
+Token: Separator       Lexeme: )
+      <Statement> -> <Compound> | <Assign> | <If> | <Return> | <Print> | <Scan> | <While>
+      <Return> -> return <Return Prime>
+Token: Keyword         Lexeme: return
+      <Return Prime> -> <Expression> ;
+      <Expression> -> <Term> <Expression Prime>
+      <Term> -> <Factor><Term Prime>
+      <Factor> -> - <Primary> | <Primary>
+      <Factor> -> <Primary>
+      <Primary> -> <Identifier> <Primary Prime> | <Integer> | ( <Expression> ) | <Real> | true | false 
+Token: Identifier      Lexeme: n
+      <Primary Prime> -> <Empty>
+      <Empty> -> epsilon
+      <Term Prime> -> <Empty>
+      <Empty> -> epsilon
+      Expression Prime -> <Empty>
+      <Empty> -> epsilon
+Token: Separator       Lexeme: ;
+      <If Prime> -> endif
+Token: Keyword         Lexeme: endif
+      <Statement List> -> <Statement> | <Statement> <Statement List>
+      <Statement> -> <Compound> | <Assign> | <If> | <Return> | <Print> | <Scan> | <While>
+      <Return> -> return <Return Prime>
+Token: Keyword         Lexeme: return
+      <Return Prime> -> <Expression> ;
+      <Expression> -> <Term> <Expression Prime>
+      <Term> -> <Factor><Term Prime>
+      <Factor> -> - <Primary> | <Primary>
+      <Factor> -> <Primary>
+      <Primary> -> <Identifier> <Primary Prime> | <Integer> | ( <Expression> ) | <Real> | true | false 
+Token: Identifier      Lexeme: fibonacci
+      <Primary Prime> -> ( <IDs> )
+Token: Separator       Lexeme: (
+      <IDs> -> <Identifier> | <Identifier>, <IDs>
+Token: Identifier      Lexeme: n
 
- SYNTAX ERROR: 
-Syntax Error: Expected Separator, but got Operator
+SYNTAX ERROR: 
+
+

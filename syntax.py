@@ -7,8 +7,8 @@ class Syntax:
     self.lexer = Lexical(input)
     self.tokens = self.lexer.parse() # Parse all tokens from input
     self.current_index = 0
-    self.current = self.tokens[0] if input else None # Takes the first character of the input if one exists
-    self.parsed_tokens = []
+    self.current = self.tokens[0] if self.tokens else None # Takes the first character of the input if one exists
+    self.output_content = []
     self.production_rules = []
 
   def match(self, exp_type, exp_lexeme = None):
@@ -26,7 +26,13 @@ class Syntax:
     if exp_lexeme is not None and lexeme != exp_lexeme:
       self.syntax_error(f"Expected {exp_lexeme}, but got {lexeme}")
 
-    self.parsed_tokens.append((token_type, lexeme))
+    for rule in self.production_rules:
+      self.output_content.append(f"      {rule}")
+
+    # Clear production rules when used
+    self.production_rules = []
+
+    self.output_content.append(f"Token: {token_type:<15} Lexeme: {lexeme}")
 
     _current = self.current
     self.next()
@@ -43,7 +49,8 @@ class Syntax:
 
   # Error function
   def syntax_error(self, expected):
-    raise SyntaxError(f"Syntax Error: {expected}")
+    self.output_content.append(f"\nSYNTAX ERROR: \n")
+    raise SyntaxError(expected)
 
   def add_production(self, rule):
     print(rule)
@@ -52,13 +59,17 @@ class Syntax:
 
   # Parsing function
   def parse(self):
-    self.Rat25S()
+    try:
+      self.Rat25S()
 
-    # In the event that all of the input tokens have been parsed but there are still tokens left
-    if self.current is not None:
-      self.syntax_error("Unexpected tokens at end of input.")
+      # In the event that all of the input tokens have been parsed but there are still tokens left
+      if self.current is not None:
+        self.syntax_error("Unexpected tokens at end of input.")
 
-    return self.parsed_tokens, self.production_rules
+        return self.output_content
+
+    except SyntaxError as e:
+      return self.output_content
 
 # Functions for each syntax rule
 
@@ -77,7 +88,7 @@ class Syntax:
   # <Opt Function Definitions> -> <Function Definitions> | <Empty>
   def optFunctionDefinitions(self):
     if self.current and self.current[1] == "function":
-      self.add_production("<Opt Function Definitions> -> <Function Definitions> | <Empty>")
+      self.add_production("<Opt Function Definitions> -> <Function Definitions>")
       self.functionDefinitions()
     else:
       self.add_production("<Opt Function Definitions> -> <Empty>")
@@ -150,11 +161,11 @@ class Syntax:
   #3 <Opt Declaration List> -> <Declaration List> | <Empty>
   def optDeclarationList(self):
     if self.current and self.current[0] == "Keyword" and self.current[1] in ["integer", "boolean", "real"]:
-      self.declarationList()
       self.add_production("<Opt Declaration List> -> <Declaration List>")
+      self.declarationList()
     else:
-      self.empty()
       self.add_production("<Opt Declaration List> -> <Empty>")
+      self.empty()
 
   def declarationList(self):
     self.add_production("<Declaration List> -> <Declaration> ; | <Declaration> ; <Declaration List>")
@@ -232,10 +243,11 @@ class Syntax:
 
 
   def assign(self):
-    self.add_production("<Assign> -> <Identifier> = <Expression>")
+    self.add_production("<Assign> -> <Identifier> = <Expression> ;")
     self.match("Identifier")
     self.match("Operator", "=")
     self.expression()
+    self.match("Separator", ";")
 
 
   def _if(self):
@@ -389,8 +401,11 @@ class Syntax:
       self.match("Separator", ")")
     elif token_type == "Real":
       self.match("Real")
-    elif token_type == "Boolean":
-      self.match("Boolean")
+    elif token_type == "Boolean" or (token_type == "Keyword" and lexeme in ["true", "false"]):
+      if token_type == "Boolean":
+        self.match("Boolean")
+      else:
+        self.match("Keyword", lexeme)
     else:
       self.syntax_error(f"Invalid <Primary>: {token_type}, {lexeme}")
 
@@ -410,11 +425,27 @@ class Syntax:
   def empty(self):
     self.add_production("<Empty> -> epsilon")
 
+def fix_is_identifier(lexer_instance):
+  def fixed_is_identifier(self, string):
+    if not string or not (string[0].isalpha() or string[0] == "_"):
+      return False
+    for ch in string:
+      if not (ch.isalnum() or ch == "_"):
+        return False
+    if string in self.keywords:
+      return False
+    return True
+
+  import types
+  lexer_instance.is_identifier = types.MethodType(fixed_is_identifier, lexer_instance)
+  return lexer_instance
+
 
 # Actual usage of parser
 def main():
   # Read three test files
   filenames = ["test1.txt", "test2.txt", "test3.txt"]
+  all_results = ""
 
   for name in filenames: # Go through each file
     try:
@@ -423,52 +454,34 @@ def main():
 
       # Get lexical tokens using lexi.py
       lexer = Lexical(input_text)
-
-      tokens = lexer.parse()
+      fix_is_identifier(lexer)
 
       parser = Syntax(input_text)
 
-
       try:
-        parsed_tokens, production_rules = parser.parse()
+        output_content = parser.parse()
 
-        output_filename = f"{name}_output.txt"
-        with open(output_filename, "w") as output_file:
+        file_results = f"Analyzing {name}:\n"
+        file_results += "="*50 + "\n\n"
+        file_results += "\n".join(output_content)
+        file_results += "\n\n"
 
-          output_file.write("Tokens and Lexemes:\n")
-          output_file.write(f"{'Token':<15}{'Lexeme':<15}\n")
-          output_file.write("-"*30 + "\n")
-          for token_type, lexeme in tokens:
-            output_file.write(f"{token_type:<15}{lexeme:<15}\n")
+        with open(f"{name}_output.txt", "w") as output_file:
+          output_file.write(file_results)
 
-          output_file.write("\nProduction Rules: \n")
-          output_file.write("-"*50 + "\n")
-          for i, rule in enumerate(production_rules, 1):
-            output_file.write(f"Rule {i}: {rule}\n")
-
-          output_file.write(f"\nSYNTAX ERROR: \n{e}\n")
-
-        print("Syntax Analyzer successfully parsed the file: ", name)
-        print(f"Results saved to: {output_filename}")
+        all_results += file_results
+        print(f"Syntax Analyzer successfully parsed {name}")
 
       except SyntaxError as e:
-        print(f"Error parsing file {name}: {e}")
-
-        output_filename = f"{name}_output.txt"
-        with open(output_filename, "w") as output_file:
-          output_file.write(f"Analyzing {name}...\n")
-          output_file.write("="*50 + "\n\n")
-
-          output_file.write("Tokens and Lexemes:\n")
-          output_file.write(f"{'Token':<15}{'Lexeme':<15}\n")
-          output_file.write("-"*30 + "\n")
-          for token_type, lexeme in tokens:
-            output_file.write(f"{token_type:<15}{lexeme:<15}\n")
-
-          output_file.write(f"\n SYNTAX ERROR: \n{e}\n")
+        print(f"Error parsing {name}: {e}")
 
     except FileNotFoundError:
       print(f"File {name} not found")
+      all_results += f"File {name} not found\n"
+  with open("output.txt", "w") as output_file:
+    output_file.write(all_results)
+
+  print("Combined results written to output.txt")
 
 if __name__ == "__main__":
   main()

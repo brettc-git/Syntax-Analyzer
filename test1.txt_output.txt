@@ -1,35 +1,9 @@
-Analyzing test1.txt...
+Analyzing test1.txt:
 ==================================================
 
-Tokens and Lexemes:
-Token          Lexeme         
-------------------------------
-Separator      $$             
-Keyword        boolean        
-Identifier     val            
-Separator      ;              
-Separator      $$             
-Keyword        scan           
-Separator      (              
-Identifier     val            
-Separator      )              
-Keyword        if             
-Separator      (              
-Identifier     val            
-Separator      )              
-Keyword        print          
-Separator      (              
-Integer        1              
-Separator      )              
-Separator      ;              
-Keyword        else           
-Keyword        print          
-Separator      (              
-Integer        0              
-Separator      )              
-Separator      ;              
-Keyword        endif          
-Separator      $$             
+      <Rat25S> -> $$ <Opt Function Definitions> $$ <Opt Declaration List> $$ <Statement List> $$
+Token: Separator       Lexeme: $$
 
- SYNTAX ERROR: 
-Syntax Error: Expected Separator, but got Keyword
+SYNTAX ERROR: 
+
+
