@@ -1,0 +1,9 @@
+Analyzing test1.txt:
+==================================================
+
+      <Rat25S> -> $$ <Opt Function Definitions> $$ <Opt Declaration List> $$ <Statement List> $$
+Token: Separator       Lexeme: $$
+
+SYNTAX ERROR: 
+
+
