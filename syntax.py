@@ -1,5 +1,11 @@
 from lexi import Lexical
 
+#
+def parseError():
+  print("Error at:")
+  # Print the error token and error lexeme
+
+# Functions for each syntax rule
 def Rat25S():
   pass
 
@@ -51,20 +57,27 @@ def statementList():
 def statement():
   print("<Statement> -> <Compound> | <Assign> | <If> | <Return> | <Print> | <Scan> | <While>")
 
+
   compound()
   assign()
+  # if current lexeme is "if"
   _if()
+  # if current lexeme is "return"
   _return()
+  # if current lexeme is "print"
   _print()
+  # if current lexeme is "scan"
   scan()
+  # if current lexeme is "while"
   _while()
+  # else:
 
 def compound():
   print("<Compound> -> { <Statement List> }")
 
 def assign():
   print("<Assign> -> <Identifier> -> <Expression>")
-  
+
 
 def _if():
   print("<If> -> if(<Condition>)<Statement> <If Prime>")
@@ -134,10 +147,10 @@ def empty():
   print("<Empty> -> epsilon")
 
 def syntax_error(expected):
-  raise SyntaxError{f"Syntax Error at line {line_num}: Expected {expected}, got {token_value} ({token_type})")
-  
+  raise SyntaxError(f"Syntax Error at line {line_num}: Expected {expected}, got {token_value} ({token_type})")
+
 def newToken():
-  current_token = lex.getToken()
+  current_token = lexi.getToken()
   if current_token == expected_type:
       nextToken()
   else:
