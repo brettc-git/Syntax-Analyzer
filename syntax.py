@@ -1,163 +1,193 @@
 from lexi import Lexical
 
-#
-def parseError():
-  print("Error at:")
-  # Print the error token and error lexeme
+class Syntax:
+  def __init__(self, input):
+    self.input = input
+    self.lexer = Lexical(input)
+    self.pos = 0
+    self.line = 1 # First line
+    self.column = 1 # First letter
+    self.current = self.input[0] if input else None # Takes the first character of the input if one exists
+
+  def next(self):
+    self.pos += 1
+    self.column += 1
+
+    if self.pos >= len(self.input):
+      self.current = None
+    else:
+      self.current = self.input[self.pos]
+      if self.current == '\n':
+        self.line += 1
+        self.column = 0
 
 # Functions for each syntax rule
-def Rat25S():
-  pass
+  def Rat25S(self):
+    print("<Rat25S> -> $$ <Opt Function Definitions> $$ <Opt Declaration List> $$ <Statement List> $$")
 
-def optFunctionDefinitions():
-  pass
+  def optFunctionDefinitions(self):
+    print("<Opt Function Definitions> -> <Function Definitions> | <Empty>")
 
-def functionDefinitions():
-  pass
+    self.functionDefinitions()
+    self.empty()
 
-def function():
-  print("<Function> -> function <Identifier> ( <Opt Parameter List> ) <Opt Declaration List> <Body>")
+  def functionDefinitions(self):
+    print("<Function Definitions -> <Function> | <Function> <Function Definitions>")
 
-def optParameterList():
-  print("<Opt Parameter List> -> <Parameter List> | <Empty>")
+    self.function()
+    self.functionDefinitions()
 
-  parameterList()
-  empty()
+  def function(self):
+    print("<Function> -> function <Identifier> ( <Opt Parameter List> ) <Opt Declaration List> <Body>")
 
-def parameterList():
-  print("<Parameter List> -> <Parameter> | <Parameter> , <Parameter List>")
+  def optParameterList(self):
+    print("<Opt Parameter List> -> <Parameter List> | <Empty>")
 
-def parameter():
-  print("<Parameter> -> <IDs> <Qualifier>")
+    self.parameterList()
+    self.empty()
 
-def qualifier():
-  print("<Qualifier> -> integer | boolean | real")
+  def parameterList(self):
+    print("<Parameter List> -> <Parameter> | <Parameter> , <Parameter List>")
 
-def body():
-  print("<Body> -> { <Statement List> }")
+  def parameter(self):
+    print("<Parameter> -> <IDs> <Qualifier>")
 
-def optDeclarationList():
-  print("<Opt Declaration List> -> <Declaration List> | <Empty>")
+  def qualifier(self):
+    print("<Qualifier> -> integer | boolean | real")
 
-def declarationList():
-  print("<Declaration List> -> <Declaration> ; | <Declaration> ; <Declaration List>")
+  def body(self):
+    print("<Body> -> { <Statement List> }")
 
-def declaration():
-  print("<Declaration> -> <Qualifier><IDs>")
+  def optDeclarationList(self):
+    print("<Opt Declaration List> -> <Declaration List> | <Empty>")
 
-  qualifier()
-  ids()
+  def declarationList(self):
+    print("<Declaration List> -> <Declaration> ; | <Declaration> ; <Declaration List>")
 
-def ids():
-  print("<IDs> -> <Identifier> | <Identifier>, <IDs>")
+  def declaration(self):
+    print("<Declaration> -> <Qualifier><IDs>")
 
-def statementList():
-  print("<Statement List> -> <Statement> | <Statement> <Statement List>")
+    self.qualifier()
+    self.ids()
 
-def statement():
-  print("<Statement> -> <Compound> | <Assign> | <If> | <Return> | <Print> | <Scan> | <While>")
+  def ids(self):
+    print("<IDs> -> <Identifier> | <Identifier>, <IDs>")
 
+  def statementList(self):
+    print("<Statement List> -> <Statement> | <Statement> <Statement List>")
 
-  compound()
-  assign()
-  # if current lexeme is "if"
-  _if()
-  # if current lexeme is "return"
-  _return()
-  # if current lexeme is "print"
-  _print()
-  # if current lexeme is "scan"
-  scan()
-  # if current lexeme is "while"
-  _while()
-  # else:
-
-def compound():
-  print("<Compound> -> { <Statement List> }")
-
-def assign():
-  print("<Assign> -> <Identifier> -> <Expression>")
+  def statement(self):
+    print("<Statement> -> <Compound> | <Assign> | <If> | <Return> | <Print> | <Scan> | <While>")
 
 
-def _if():
-  print("<If> -> if(<Condition>)<Statement> <If Prime>")
+    self.compound()
+    self.assign()
+    # if current lexeme is "if"
+    self._if()
+    # if current lexeme is "return"
+    self._return()
+    # if current lexeme is "print"
+    self._print()
+    # if current lexeme is "scan"
+    self.scan()
+    # if current lexeme is "while"
+    self._while()
+    # else:
 
-def ifPrime():
-  print("<If Prime> -> endif | else <Statement> endif")
+  def compound(self):
+    print("<Compound> -> { <Statement List> }")
 
-def _return():
-  print("<Return> -> return <Return Prime>")
-
-def returnPrime():
-  print("<Return Prime> -> ; | <Expression> ;")
-
-def _print():
-  print("<Print> ::= print ( <Expression>);")
-
-def scan():
-  print("<Scan> -> scan(<IDs>);")
-
-def _while():
-  print("<While> -> while ( <Condition> ) <Statement> endwhile")
-  condition()
-  statement()
-
-def condition():
-  print("<Condition> -> <Expression> <Relop> <Expression>")
-  expression()
-  relop()
-  expression()
-
-def relop():
-  print("<Relop> -> == | != | > | < | <= | =>")
-
-def expression():
-  print("<Expression> -> <Term> <Expression Prime>")
-  term()
-  expressionPrime()
-
-def expressionPrime():
-  print("Expression Prime -> +<Term><Expression Prime> | -<Term><Expression Prime> | empty")
-  term()
-  expressionPrime()
-  empty()
-
-def term():
-  print("<Term> -> <Factor><Term Prime>")
-
-  factor()
-  termPrime()
-
-def termPrime():
-  print("<Term Prime> -> * <Factor> <Term Prime> | / <Factor> <Term Prime> | empty")
-
-  empty()
+  def assign(self):
+    print("<Assign> -> <Identifier> -> <Expression>")
 
 
-def factor():
-  print("<Factor> ::= - <Primary> | <Primary>")
+  def _if(self):
+    print("<If> -> if(<Condition>)<Statement> <If Prime>")
 
-def primary():
-  print("<Primary> -> <Identifier> <Primary Prime> | <Integer> | ( <Expression> ) | <Real> | true | false ")
+  def ifPrime(self):
+    print("<If Prime> -> endif | else <Statement> endif")
 
-def primaryPrime():
-  print("<Primary Prime> -> ( <IDs> ) | empty")
+  def _return(self):
+    print("<Return> -> return <Return Prime>")
 
-def empty():
-  print("<Empty> -> epsilon")
+  def returnPrime(self):
+    print("<Return Prime> -> ; | <Expression> ;")
 
-def syntax_error(expected):
-  raise SyntaxError(f"Syntax Error at line {line_num}: Expected {expected}, got {token_value} ({token_type})")
+  def _print(self):
+    print("<Print> ::= print ( <Expression>);")
 
-def newToken():
-  current_token = lexi.getToken()
-  if current_token == expected_type:
-      nextToken()
-  else:
-      syntax_error
+  def scan(self):
+    print("<Scan> -> scan(<IDs>);")
 
-def parser(input_code):
-  lex - Lexical(input_code)
-  nextToken()
-  Rat25S()
+  def _while(self):
+    print("<While> -> while ( <Condition> ) <Statement> endwhile")
+    self.condition()
+    self.statement()
 
+  def condition(self):
+    print("<Condition> -> <Expression> <Relop> <Expression>")
+    self.expression()
+    self.relop()
+    self.expression()
+
+  def relop(self):
+    print("<Relop> -> == | != | > | < | <= | =>")
+
+  def expression(self):
+    print("<Expression> -> <Term> <Expression Prime>")
+    self.term()
+    self.expressionPrime()
+
+  def expressionPrime(self):
+    print("Expression Prime -> +<Term><Expression Prime> | -<Term><Expression Prime> | empty")
+    self.term()
+    self.expressionPrime()
+    self.empty()
+
+  def term(self):
+    print("<Term> -> <Factor><Term Prime>")
+
+    self.factor()
+    self.termPrime()
+
+  def termPrime(self):
+    print("<Term Prime> -> * <Factor> <Term Prime> | / <Factor> <Term Prime> | empty")
+
+    self.empty()
+
+
+  def factor(self):
+    print("<Factor> ::= - <Primary> | <Primary>")
+
+  def primary(self):
+    print("<Primary> -> <Identifier> <Primary Prime> | <Integer> | ( <Expression> ) | <Real> | true | false ")
+
+  def primaryPrime(self):
+    print("<Primary Prime> -> ( <IDs> ) | empty")
+
+  def empty(self):
+    print("<Empty> -> epsilon")
+
+  # Error function
+  def syntax_error(expected):
+    raise SyntaxError(f"Syntax Error at line {line_num}: Expected {expected}, got {token_value} ({token_type})")
+
+# def newToken():
+#   current_token = lexi.getToken()
+#   if current_token == expected_type:
+#       nextToken()
+#   else:
+#       syntax_error
+
+
+
+# Create three test files
+filenames = ["test1.txt", "test2.txt", "test3.txt"]
+
+for filename in filenames:
+  try:
+    with open(filename, 'r') as file:
+      data = file.read()
+
+  except FileNotFoundError:
+    print(f"File {filename} not found")
