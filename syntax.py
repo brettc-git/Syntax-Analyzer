@@ -7,11 +7,11 @@ class Syntax:
     self.lexer = Lexical(input)
     self.tokens = self.lexer.parse() # Parse all tokens from input
     self.current_index = 0
-    self.current = self.tokens[0] if self.tokens else None # Takes the first character of the input if one exists
-    self.output_content = []
-    self.production_rules = []
+    self.current = self.tokens[0] if self.tokens else None # Takes the first token if one exists
+    self.output_content = []  # To store output in the required format
+    self.last_production_rules = []  # Store last rules before adding token
 
-  def match(self, exp_type, exp_lexeme = None):
+  def match(self, exp_type, exp_lexeme=None):
     # Get the current token and expected type and the lexeme
     if self.current is None:
       self.syntax_error(f"Expected {exp_type}, but reached end of input")
@@ -26,13 +26,15 @@ class Syntax:
     if exp_lexeme is not None and lexeme != exp_lexeme:
       self.syntax_error(f"Expected {exp_lexeme}, but got {lexeme}")
 
-    for rule in self.production_rules:
-      self.output_content.append(f"      {rule}")
+    # Append the production rules that led to this token
+    for rule in self.last_production_rules:
+      self.output_content.append(f"     {rule}")
 
-    # Clear production rules when used
-    self.production_rules = []
+    # Clear the production rules now that they've been used
+    self.last_production_rules = []
 
-    self.output_content.append(f"Token: {token_type:<15} Lexeme: {lexeme}")
+    # Store the token and lexeme in the output
+    self.output_content.append(f"**Token: {token_type:<15} Lexeme: {lexeme}**")
 
     _current = self.current
     self.next()
@@ -47,15 +49,15 @@ class Syntax:
       # If there are no more tokens, return None
       self.current = None
 
-  # Error function
-  def syntax_error(self, expected):
-    self.output_content.append(f"\nSYNTAX ERROR: \n")
-    raise SyntaxError(expected)
-
+  # Add production rule to the list
   def add_production(self, rule):
     print(rule)
-    # Add a production rule to the syntax
-    self.production_rules.append(rule)
+    self.last_production_rules.append(rule)
+
+  # Error function
+  def syntax_error(self, expected):
+    self.output_content.append(f"\n SYNTAX ERROR: \n{expected}")
+    raise SyntaxError(expected)
 
   # Parsing function
   def parse(self):
@@ -66,16 +68,15 @@ class Syntax:
       if self.current is not None:
         self.syntax_error("Unexpected tokens at end of input.")
 
-        return self.output_content
-
+      return self.output_content
     except SyntaxError as e:
       return self.output_content
 
 # Functions for each syntax rule
 
-
   def Rat25S(self):
-    self.add_production("<Rat25S> -> $$ <Opt Function Definitions> $$ <Opt Declaration List> $$ <Statement List> $$")
+    rule = "<Rat25S> -> $$ <Opt Function Definitions> $$ <Opt Declaration List> $$ <Statement List> $$"
+    self.add_production(rule)
 
     self.match("Separator", "$$")
     self.optFunctionDefinitions()
@@ -85,18 +86,19 @@ class Syntax:
     self.statementList()
     self.match("Separator", "$$")
 
-  # <Opt Function Definitions> -> <Function Definitions> | <Empty>
   def optFunctionDefinitions(self):
     if self.current and self.current[1] == "function":
-      self.add_production("<Opt Function Definitions> -> <Function Definitions>")
+      rule = "<Opt Function Definitions> -> <Function Definitions>"
+      self.add_production(rule)
       self.functionDefinitions()
     else:
-      self.add_production("<Opt Function Definitions> -> <Empty>")
+      rule = "<Opt Function Definitions> -> <Empty>"
+      self.add_production(rule)
       self.empty()
 
-
   def functionDefinitions(self):
-    self.add_production("<Function Definitions -> <Function> | <Function> <Function Definitions>")
+    rule = "<Function Definitions> -> <Function> | <Function> <Function Definitions>"
+    self.add_production(rule)
 
     self.function()
 
@@ -104,7 +106,8 @@ class Syntax:
       self.functionDefinitions()
 
   def function(self):
-    self.add_production("<Function> -> function <Identifier> ( <Opt Parameter List> ) <Opt Declaration List> <Body>")
+    rule = "<Function> -> function <Identifier> ( <Opt Parameter List> ) <Opt Declaration List> <Body>"
+    self.add_production(rule)
 
     self.match("Keyword", "function")
     self.match("Identifier")
@@ -114,33 +117,35 @@ class Syntax:
     self.optDeclarationList()
     self.body()
 
-  # <Opt Parameter List> -> <Parameter List> | <Empty>
   def optParameterList(self):
     if self.current and self.current[0] == "Identifier":
-      self.add_production("<Opt Parameter List> -> <Parameter List>")
+      rule = "<Opt Parameter List> -> <Parameter List>"
+      self.add_production(rule)
       self.parameterList()
     else:
-      self.add_production("<Opt Parameter List> -> <Empty>")
+      rule = "<Opt Parameter List> -> <Empty>"
+      self.add_production(rule)
       self.empty()
 
   def parameterList(self):
-    self.add_production("<Parameter List> -> <Parameter> | <Parameter> , <Parameter List>")
+    rule = "<Parameter List> -> <Parameter> | <Parameter> , <Parameter List>"
+    self.add_production(rule)
 
     self.parameter()
     if self.current and self.current[1] == ",":
       self.match("Separator", ",")
       self.parameterList()
 
-
   def parameter(self):
-    self.add_production("<Parameter> -> <IDs> <Qualifier>")
+    rule = "<Parameter> -> <IDs> <Qualifier>"
+    self.add_production(rule)
 
     self.ids()
     self.qualifier()
 
-
   def qualifier(self):
-    self.add_production("<Qualifier> -> integer | boolean | real")
+    rule = "<Qualifier> -> integer | boolean | real"
+    self.add_production(rule)
 
     if self.current is None:
       self.syntax_error("Unexpected end of input in <Qualifier>")
@@ -149,42 +154,45 @@ class Syntax:
     if token_type == "Keyword" and lexeme in ["integer", "boolean", "real"]:
       self.match("Keyword", lexeme)
     else:
-      self.syntax_error("Error: expected 'integer', 'boolean', or 'real' in <Qualifier>")
+      self.syntax_error("Invalid qualifier. Expected 'integer', 'boolean', or 'real'")
 
   def body(self):
-    self.add_production("<Body> -> { <Statement List> }")
+    rule = "<Body> -> { <Statement List> }"
+    self.add_production(rule)
 
     self.match("Separator", "{")
     self.statementList()
     self.match("Separator", "}")
 
-  #3 <Opt Declaration List> -> <Declaration List> | <Empty>
   def optDeclarationList(self):
     if self.current and self.current[0] == "Keyword" and self.current[1] in ["integer", "boolean", "real"]:
-      self.add_production("<Opt Declaration List> -> <Declaration List>")
+      rule = "<Opt Declaration List> -> <Declaration List>"
+      self.add_production(rule)
       self.declarationList()
     else:
-      self.add_production("<Opt Declaration List> -> <Empty>")
+      rule = "<Opt Declaration List> -> <Empty>"
+      self.add_production(rule)
       self.empty()
 
   def declarationList(self):
-    self.add_production("<Declaration List> -> <Declaration> ; | <Declaration> ; <Declaration List>")
+    rule = "<Declaration List> -> <Declaration> ; | <Declaration> ; <Declaration List>"
+    self.add_production(rule)
 
     self.declaration()
     self.match("Separator", ";")
-
     if self.current and self.current[0] == "Keyword" and self.current[1] in ["integer", "real", "boolean"]:
       self.declarationList()
 
-
   def declaration(self):
-    self.add_production("<Declaration> -> <Qualifier><IDs>")
+    rule = "<Declaration> -> <Qualifier><IDs>"
+    self.add_production(rule)
 
     self.qualifier()
     self.ids()
 
   def ids(self):
-    self.add_production("<IDs> -> <Identifier> | <Identifier>, <IDs>")
+    rule = "<IDs> -> <Identifier> | <Identifier>, <IDs>"
+    self.add_production(rule)
 
     self.match("Identifier")
 
@@ -193,65 +201,66 @@ class Syntax:
       self.ids()
 
   def statementList(self):
-    self.add_production("<Statement List> -> <Statement> | <Statement> <Statement List>")
+    rule = "<Statement List> -> <Statement> | <Statement> <Statement List>"
+    self.add_production(rule)
 
     self.statement()
 
+    # Check if there are more statements
     if self.current and self.current[0] in ["Identifier", "Separator", "Keyword"] and \
-      (self.current[1] not in ["}", "endif", "endwhile"]):
+       (self.current[1] not in ["$$", "}", "endif", "endwhile"]):
         self.statementList()
 
   def statement(self):
-    self.add_production("<Statement> -> <Compound> | <Assign> | <If> | <Return> | <Print> | <Scan> | <While>")
+    rule = "<Statement> -> <Compound> | <Assign> | <If> | <Return> | <Print> | <Scan> | <While>"
+    self.add_production(rule)
 
     if not self.current:
-      self.syntax_error("Unexpected end of input in <Statement>")
+        self.syntax_error("Unexpected end of input in <Statement>")
 
     token_type, lexeme = self.current
 
-    # <Compound>
     if token_type == "Separator" and lexeme == "{":
-      self.compound()
-
-    # <Assign>
+        self.compound()
     elif token_type == "Identifier":
-      self.assign()
-
-    # <If>, <Return>, <Print>, <Scan>, <While>
+        self.assign()
     elif token_type == "Keyword":
-      if lexeme == "if":
-        self._if()
-      elif lexeme == "return":
-        self._return()
-      elif lexeme == "print":
-        self._print()
-      elif lexeme == "scan":
-        self.scan()
-      elif lexeme == "while":
-        self._while()
-      else:
-        self.syntax_error("Unexpected keyword in <Statement>")
+        if lexeme == "if":
+            self._if()
+        elif lexeme == "return":
+            self._return()
+        elif lexeme == "print":
+            self._print()
+        elif lexeme == "scan":
+            self.scan()
+        elif lexeme == "while":
+            self._while()
+        else:
+            self.syntax_error(f"Unexpected keyword '{lexeme}' in <Statement>")
     else:
-      self.syntax_error("Unexpected token for <Statement>")
-
+        self.syntax_error(f"Invalid token for <Statement>: {token_type}, {lexeme}")
 
   def compound(self):
-    self.add_production("<Compound> -> { <Statement List> }")
+    rule = "<Compound> -> { <Statement List> }"
+    self.add_production(rule)
+
     self.match("Separator", "{")
     self.statementList()
     self.match("Separator", "}")
 
-
   def assign(self):
-    self.add_production("<Assign> -> <Identifier> = <Expression> ;")
+    rule = "<Assign> -> <Identifier> = <Expression> ;"
+    self.add_production(rule)
+
     self.match("Identifier")
     self.match("Operator", "=")
     self.expression()
     self.match("Separator", ";")
 
-
   def _if(self):
-    self.add_production("<If> -> if(<Condition>)<Statement> <If Prime>")
+    rule = "<If> -> if(<Condition>)<Statement> <If Prime>"
+    self.add_production(rule)
+
     self.match("Keyword", "if")
     self.match("Separator", "(")
     self.condition()
@@ -260,34 +269,38 @@ class Syntax:
     self.ifPrime()
 
   def ifPrime(self):
-    # <If Prime> -> endif | else <Statement> endif")
     if self.current and self.current[1] == "endif":
-      self.add_production("<If Prime> -> endif")
+      rule = "<If Prime> -> endif"
+      self.add_production(rule)
       self.match("Keyword", "endif")
     else:
-      self.add_production("<If Prime> -> else <Statement> endif")
+      rule = "<If Prime> -> else <Statement> endif"
+      self.add_production(rule)
       self.match("Keyword", "else")
       self.statement()
       self.match("Keyword", "endif")
 
-
   def _return(self):
-    self.add_production("<Return> -> return <Return Prime>")
+    rule = "<Return> -> return <Return Prime>"
+    self.add_production(rule)
+
     self.match("Keyword", "return")
     self.returnPrime()
 
-
   def returnPrime(self):
     if self.current and self.current[1] == ";":
-      self.add_production("<Return Prime> -> ;")
+      rule = "<Return Prime> -> ;"
+      self.add_production(rule)
       self.match("Separator", ";")
     else:
-      self.add_production("<Return Prime> -> <Expression> ;")
+      rule = "<Return Prime> -> <Expression> ;"
+      self.add_production(rule)
       self.expression()
       self.match("Separator", ";")
 
   def _print(self):
-    self.add_production("<Print> -> print ( <Expression>) ;")
+    rule = "<Print> -> print ( <Expression>) ;"
+    self.add_production(rule)
 
     self.match("Keyword", "print")
     self.match("Separator", "(")
@@ -295,9 +308,9 @@ class Syntax:
     self.match("Separator", ")")
     self.match("Separator", ";")
 
-
   def scan(self):
-    self.add_production("<Scan> -> scan(<IDs>);")
+    rule = "<Scan> -> scan(<IDs>);"
+    self.add_production(rule)
 
     self.match("Keyword", "scan")
     self.match("Separator", "(")
@@ -305,9 +318,9 @@ class Syntax:
     self.match("Separator", ")")
     self.match("Separator", ";")
 
-
   def _while(self):
-    self.add_production("<While> -> while ( <Condition> ) <Statement> endwhile")
+    rule = "<While> -> while ( <Condition> ) <Statement> endwhile"
+    self.add_production(rule)
 
     self.match("Keyword", "while")
     self.match("Separator", "(")
@@ -316,74 +329,80 @@ class Syntax:
     self.statement()
     self.match("Keyword", "endwhile")
 
-
   def condition(self):
-    self.add_production("<Condition> -> <Expression> <Relop> <Expression>")
+    rule = "<Condition> -> <Expression> <Relop> <Expression>"
+    self.add_production(rule)
 
     self.expression()
     self.relop()
     self.expression()
 
-
   def relop(self):
-    self.add_production("<Relop> -> == | != | > | < | <= | =>")
-    if self.current and self.current[0] == "Operator" and self.current[1] in ["==", "!=", ">", "<", "<=", ">="]:
+    rule = "<Relop> -> == | != | > | < | <= | =>"
+    self.add_production(rule)
+
+    if self.current and self.current[0] == "Operator" and self.current[1] in ["==", "!=", ">", "<", "<=", "=>"]:
       self.match("Operator", self.current[1])
     else:
       self.syntax_error("Relational operator expected.")
 
-
-
   def expression(self):
-    self.add_production("<Expression> -> <Term> <Expression Prime>")
+    rule = "<Expression> -> <Term> <Expression Prime>"
+    self.add_production(rule)
+
     self.term()
     self.expressionPrime()
 
-  # Expression Prime -> + <Term> <Expression Prime> | - <Term> <Expression Prime> | <Empty>
   def expressionPrime(self):
     if self.current and self.current[0] == "Operator" and self.current[1] in ["+", "-"]:
-      self.add_production("Expression Prime -> +<Term><Expression Prime> | -<Term><Expression Prime>")
+      rule = "<Expression Prime> -> +<Term><Expression Prime> | -<Term><Expression Prime>"
+      self.add_production(rule)
 
-      self.match("Operator", self.current[1])
+      op = self.current[1]
+      self.match("Operator", op)
       self.term()
       self.expressionPrime()
     else:
-      self.add_production("Expression Prime -> <Empty>")
+      rule = "<Expression Prime> -> <Empty>"
+      self.add_production(rule)
       self.empty()
 
-
   def term(self):
-    self.add_production("<Term> -> <Factor><Term Prime>")
+    rule = "<Term> -> <Factor><Term Prime>"
+    self.add_production(rule)
+
     self.factor()
     self.termPrime()
 
-  # <Term Prime> -> * <Factor> <Term Prime> | / <Factor> <Term Prime> | <Empty>
   def termPrime(self):
     if self.current and self.current[0] == "Operator" and self.current[1] in ["*", "/"]:
-      self.add_production("<Term Prime> -> * <Factor> <Term Prime> | / <Factor> <Term Prime>")
+      rule = "<Term Prime> -> * <Factor> <Term Prime> | / <Factor> <Term Prime>"
+      self.add_production(rule)
 
-      self.match("Operator", self.current[1])
+      op = self.current[1]
+      self.match("Operator", op)
       self.factor()
       self.termPrime()
     else:
-      self.add_production("<Term Prime> -> <Empty>")
+      rule = "<Term Prime> -> <Empty>"
+      self.add_production(rule)
       self.empty()
 
-
-  # <Factor> -> - <Primary> | <Primary>
   def factor(self):
-    self.add_production("<Factor> -> - <Primary> | <Primary>")
     if self.current and self.current[0] == "Operator" and self.current[1] == "-":
-      self.add_production("<Factor> -> - <Primary>")
+      rule = "<Factor> -> - <Primary>"
+      self.add_production(rule)
+
       self.match("Operator", "-")
       self.primary()
     else:
-      self.add_production("<Factor> -> <Primary>")
+      rule = "<Factor> -> <Primary>"
+      self.add_production(rule)
       self.primary()
 
-
   def primary(self):
-    self.add_production("<Primary> -> <Identifier> <Primary Prime> | <Integer> | ( <Expression> ) | <Real> | true | false ")
+    rule = "<Primary> -> <Identifier> <Primary Prime> | <Integer> | ( <Expression> ) | <Real> | true | false"
+    self.add_production(rule)
 
     if self.current is None:
       self.syntax_error("Unexpected end of input in <Primary>")
@@ -409,79 +428,88 @@ class Syntax:
     else:
       self.syntax_error(f"Invalid <Primary>: {token_type}, {lexeme}")
 
-
-  # <Primary Prime> -> ( <IDs> ) | <Empty> )
   def primaryPrime(self):
     if self.current and self.current[0] == "Separator" and self.current[1] == "(":
-      self.add_production("<Primary Prime> -> ( <IDs> )")
+      rule = "<Primary Prime> -> ( <IDs> )"
+      self.add_production(rule)
+
       self.match("Separator", "(")
       self.ids()
       self.match("Separator", ")")
     else:
-      self.add_production("<Primary Prime> -> <Empty>")
+      rule = "<Primary Prime> -> <Empty>"
+      self.add_production(rule)
       self.empty()
 
-
   def empty(self):
-    self.add_production("<Empty> -> epsilon")
+    rule = "<Empty> -> epsilon"
+    self.add_production(rule)
 
+# Function to fix the identifier method in Lexical class
 def fix_is_identifier(lexer_instance):
-  def fixed_is_identifier(self, string):
-    if not string or not (string[0].isalpha() or string[0] == "_"):
-      return False
-    for ch in string:
-      if not (ch.isalnum() or ch == "_"):
-        return False
-    if string in self.keywords:
-      return False
-    return True
+    # Override the is_identifier method with the corrected version
+    def fixed_is_identifier(self, string):
+        if not string or not (string[0].isalpha() or string[0] == '_'):
+            return False
+        for ch in string:
+            if not (ch.isalnum() or ch == '_'):
+                return False
+        if string in self.keywords:
+            return False  # Keyword != Identifier
+        return True
 
-  import types
-  lexer_instance.is_identifier = types.MethodType(fixed_is_identifier, lexer_instance)
-  return lexer_instance
+    # Attach the fixed method to the instance
+    import types
+    lexer_instance.is_identifier = types.MethodType(fixed_is_identifier, lexer_instance)
+    return lexer_instance
 
-
-# Actual usage of parser
+# Main program with file output implementation
 def main():
-  # Read three test files
-  filenames = ["test1.txt", "test2.txt", "test3.txt"]
-  all_results = ""
+    # Read three test files
+    filenames = ["test1.txt", "test2.txt", "test3.txt", "test4.txt"]
+    all_results = ""
 
-  for name in filenames: # Go through each file
-    try:
-      with open(name, 'r') as file: # Open the file
-        input_text = file.read() # Read the file
+    for name in filenames:  # Go through each file
+        try:
+            with open(name, 'r') as file:  # Open the file
+                input_text = file.read()  # Read the file
 
-      # Get lexical tokens using lexi.py
-      lexer = Lexical(input_text)
-      fix_is_identifier(lexer)
+            # Apply the fix to lexer
+            lexer = Lexical(input_text)
+            fix_is_identifier(lexer)
 
-      parser = Syntax(input_text)
+            # Then parse and get output content
+            parser = Syntax(input_text)
+            try:
+                output_content = parser.parse()
 
-      try:
-        output_content = parser.parse()
+                file_results = f"Analysis for {name}\n"
+                file_results += "="*50 + "\n\n"
+                file_results += "\n".join(output_content)
+                file_results += "\n\n"
 
-        file_results = f"Analyzing {name}:\n"
-        file_results += "="*50 + "\n\n"
-        file_results += "\n".join(output_content)
-        file_results += "\n\n"
+                # Write to individual file
+                with open(f"{name}_output.txt", 'w') as output_file:
+                    output_file.write(file_results)
 
-        with open(f"{name}_output.txt", "w") as output_file:
-          output_file.write(file_results)
+                # Append to combined results
+                all_results += file_results
 
-        all_results += file_results
-        print(f"Syntax Analyzer successfully parsed {name}")
+                print(f"Syntax Analyzer successfully parsed the file: {name}")
 
-      except SyntaxError as e:
-        print(f"Error parsing {name}: {e}")
+            except SyntaxError as e:
+                print(f"Error parsing {name}: {e}")
+                # The error will be in the output_content already
 
-    except FileNotFoundError:
-      print(f"File {name} not found")
-      all_results += f"File {name} not found\n"
-  with open("output.txt", "w") as output_file:
-    output_file.write(all_results)
+        except FileNotFoundError:
+            print(f"File {name} not found")
+            all_results += f"File {name} not found\n\n"
 
-  print("Combined results written to output.txt")
+    # Write all results to a single output file
+    with open("output.txt", 'w') as output_file:
+        output_file.write(all_results)
+
+    print("Combined results written to output.txt")
 
 if __name__ == "__main__":
-  main()
+    main()

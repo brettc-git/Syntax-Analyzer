@@ -1,22 +1,13 @@
-[* Program prints fibonacci sequence up to n  *]
-
 $$
-function fibonacci(n integer)
-{
-    if (n <= 1)
-        return n;
+function check (num integer) {
+    if (num > 0)
+        print(num);
+    else
+        print(0);
     endif
-    return fibonacci(n - 1) + fibonacci(n - 2);
 }
 $$
-integer n, i;
-$$ 
-i=0
-
-while (i < n)
-{
-    print(fibonacci(i));
-    i = i + 1;
-}
-endwhile
-$$ 
+$$
+scan(num);
+check(num);
+$$
