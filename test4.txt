@@ -1,0 +1,9 @@
+$$
+function broken () {
+    integer x
+    x = 10;
+}
+$$
+$$
+broken();
+$$

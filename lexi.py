@@ -179,5 +179,5 @@ class Lexical:
 #     except FileNotFoundError:
 #         print(f"File {name} not found")
 
-# with open("output.txt", 'w') as file:
+# with open("Lexi_output.txt", 'w') as file:
 #     file.write(result)

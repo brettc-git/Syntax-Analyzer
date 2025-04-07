@@ -1,12 +1,15 @@
-[* Program that takes a boolean input and prints the value for it *]
-
 $$
-boolean val;
+function convertx (fahr integer) {
+    return 5 * (fahr - 32) / 9;
+}
 $$
-scan(val)
-if (val) [* Check if true *]
-    print(1);
-else [* Check if false *]
-    print(0);
-endif
+integer low, high, step;
+$$
+scan (low, high, step);
+while (low <= high) 
+    { print(low);
+     print(convertx(low));
+     low = low + step;
+    }
+endwhile
 $$

@@ -1,0 +1,22 @@
+Analysis for test4.txt
+==================================================
+
+     <Rat25S> -> $$ <Opt Function Definitions> $$ <Opt Declaration List> $$ <Statement List> $$
+**Token: Separator       Lexeme: $$**
+     <Opt Function Definitions> -> <Function Definitions>
+     <Function Definitions> -> <Function> | <Function> <Function Definitions>
+     <Function> -> function <Identifier> ( <Opt Parameter List> ) <Opt Declaration List> <Body>
+**Token: Keyword         Lexeme: function**
+**Token: Identifier      Lexeme: broken**
+**Token: Separator       Lexeme: (**
+     <Opt Parameter List> -> <Empty>
+     <Empty> -> epsilon
+**Token: Separator       Lexeme: )**
+     <Opt Declaration List> -> <Empty>
+     <Empty> -> epsilon
+     <Body> -> { <Statement List> }
+**Token: Separator       Lexeme: {**
+
+ SYNTAX ERROR: 
+Unexpected keyword 'integer' in <Statement>
+
