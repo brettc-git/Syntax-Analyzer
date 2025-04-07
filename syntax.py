@@ -16,7 +16,7 @@ class Syntax:
     if self.current is None:
       self.syntax_error(f"Expected {exp_type}, but reached end of input")
 
-    token_type, lexeme = self.current
+    token_type, lexeme, line = self.current
 
     # Throw an error if the token type does not match the expected type
     if token_type != exp_type:
@@ -56,7 +56,9 @@ class Syntax:
 
   # Error function
   def syntax_error(self, expected):
+    token_type, lexeme, line = self.current
     self.output_content.append(f"\n SYNTAX ERROR: \n{expected}")
+    self.output_content.append(f"Token: {token_type:<15} Lexeme: {lexeme:<15}\n Line: {line}")
     raise SyntaxError(expected)
 
   # Parsing function
@@ -150,7 +152,7 @@ class Syntax:
     if self.current is None:
       self.syntax_error("Unexpected end of input in <Qualifier>")
 
-    token_type, lexeme = self.current
+    token_type, lexeme, line = self.current
     if token_type == "Keyword" and lexeme in ["integer", "boolean", "real"]:
       self.match("Keyword", lexeme)
     else:
@@ -218,7 +220,7 @@ class Syntax:
     if not self.current:
         self.syntax_error("Unexpected end of input in <Statement>")
 
-    token_type, lexeme = self.current
+    token_type, lexeme, line = self.current
 
     if token_type == "Separator" and lexeme == "{":
         self.compound()
@@ -407,7 +409,7 @@ class Syntax:
     if self.current is None:
       self.syntax_error("Unexpected end of input in <Primary>")
 
-    token_type, lexeme = self.current
+    token_type, lexeme, line = self.current
 
     if token_type == "Identifier":
       self.match("Identifier")

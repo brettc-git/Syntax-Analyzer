@@ -106,4 +106,6 @@ Analysis for test3.txt
 
  SYNTAX ERROR: 
 Expected Operator, but got Separator
+Token: Separator       Lexeme: (              
+ Line: 12
 

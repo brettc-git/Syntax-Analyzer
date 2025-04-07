@@ -506,6 +506,8 @@ Analysis for test2.txt
 
  SYNTAX ERROR: 
 Expected Separator, but got Keyword
+Token: Keyword         Lexeme: print          
+ Line: 34
 
 Analysis for test3.txt
 ==================================================
@@ -615,6 +617,8 @@ Analysis for test3.txt
 
  SYNTAX ERROR: 
 Expected Operator, but got Separator
+Token: Separator       Lexeme: (              
+ Line: 12
 
 Analysis for test4.txt
 ==================================================
@@ -637,4 +641,6 @@ Analysis for test4.txt
 
  SYNTAX ERROR: 
 Unexpected keyword 'integer' in <Statement>
+Token: Keyword         Lexeme: integer        
+ Line: 3
 

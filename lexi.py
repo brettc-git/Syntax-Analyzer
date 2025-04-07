@@ -89,28 +89,28 @@ class Lexical:
 
             # Check for the $$ token
             if self.current == "$" and self.peek() == "$":
-                tokens.append(("Separator", "$$"))
+                tokens.append(("Separator", "$$", self.line))
                 self.next()
                 self.next()
                 continue
 
             # Check for separators that are single characters
             if self.current in self.separators:
-                tokens.append(("Separator", self.current))
+                tokens.append(("Separator", self.current, self.line))
                 self.next()
                 continue
 
 
             # Check two character operators first (avoiding partial matches)
             if (self.current is not None) and (self.peek() is not None) and (self.current + self.peek() in self.double_operators):
-                tokens.append(("Operator", self.current + self.peek()))
+                tokens.append(("Operator", self.current + self.peek(), self.line))
                 self.next()
                 self.next()
                 continue
 
             # Check one character operators
             if self.current in self.single_operators:
-                tokens.append(("Operator", self.current))
+                tokens.append(("Operator", self.current, self.line))
                 self.next()
                 continue
 
@@ -123,11 +123,11 @@ class Lexical:
 
                 if identifier in self.keywords:
                     if identifier in ["true", "false"]:
-                        tokens.append(("Boolean", identifier))
+                        tokens.append(("Boolean", identifier, self.line))
                     else:
-                        tokens.append(("Keyword", identifier))
+                        tokens.append(("Keyword", identifier, self.line))
                 else:
-                    tokens.append(("Identifier", identifier))
+                    tokens.append(("Identifier", identifier, self.line))
                 continue
 
             # Case for numbers
@@ -144,13 +144,13 @@ class Lexical:
                     self.next()
 
                 if num_isReal:
-                    tokens.append(("Real", number))
+                    tokens.append(("Real", number, self.line))
                 else:
-                    tokens.append(("Integer", number))
+                    tokens.append(("Integer", number, self.line))
                 continue
 
             if self.current is not None:
-                tokens.append(("Unknown", self.current))
+                tokens.append(("Unknown", self.current, self.line))
                 self.next()
 
         return tokens

@@ -19,4 +19,6 @@ Analysis for test4.txt
 
  SYNTAX ERROR: 
 Unexpected keyword 'integer' in <Statement>
+Token: Keyword         Lexeme: integer        
+ Line: 3
 

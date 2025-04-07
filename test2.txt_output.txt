@@ -302,4 +302,6 @@ Analysis for test2.txt
 
  SYNTAX ERROR: 
 Expected Separator, but got Keyword
+Token: Keyword         Lexeme: print          
+ Line: 34
 
